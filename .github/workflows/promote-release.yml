@@ -52,10 +52,17 @@ jobs:
       - run: npm run check:beta-readiness
       - run: node scripts/test.mjs
       - run: node scripts/publish.mjs --dry-run --manifest npm-artifacts.json
+      - name: Checkout protected verifier from the workflow commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          path: release-verifier-source
+          sparse-checkout: scripts/verify-draft-release.mjs
+          persist-credentials: false
       - name: Verify draft inventory, checksums, and attestations
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/verify-draft-release.mjs "${{ inputs.tag }}"
+        run: node release-verifier-source/scripts/verify-draft-release.mjs "${{ inputs.tag }}"
       - name: Submit four packages to npm staging with OIDC
         if: ${{ inputs.phase == 'stage-npm' }}
         run: node scripts/publish.mjs --stage --manifest npm-artifacts.json

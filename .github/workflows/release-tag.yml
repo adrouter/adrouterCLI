@@ -102,3 +102,7 @@ jobs:
             release-assets/BUNDLED_SOURCES.json \
             release-assets/THIRD_PARTY_NOTICES.md \
             release-assets/SHA256SUMS
+      - name: Verify staged draft inventory, checksums, and attestations
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/verify-draft-release.mjs "${GITHUB_REF_NAME}"

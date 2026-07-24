@@ -7,5 +7,7 @@ test("draft verifier checks all three release metadata attestations", () => {
 	for (const artifact of ["adrouterCLI.cdx.json", "BUNDLED_SOURCES.json", "THIRD_PARTY_NOTICES.md"]) {
 		assert.match(source, new RegExp(artifact.replace(".", "\\.")));
 	}
-	assert.match(source, /gh", \["attestation", "verify"/);
+	assert.match(source, /const args = \["attestation", "verify"/);
+	assert.match(source, /run\("gh", args\)/);
+	assert.match(source, /--predicate-type", "https:\/\/cyclonedx\.org\/bom"/);
 });

@@ -32,7 +32,11 @@ try {
 	}
 	run("sha256sum", ["-c", "SHA256SUMS"], directory);
 	for (const artifact of ["adrouterCLI.cdx.json", "BUNDLED_SOURCES.json", "THIRD_PARTY_NOTICES.md"]) {
-		run("gh", ["attestation", "verify", join(directory, artifact), "--repo", "adrouter/adrouterCLI"]);
+		const args = ["attestation", "verify", join(directory, artifact), "--repo", "adrouter/adrouterCLI"];
+		if (artifact === "adrouterCLI.cdx.json") {
+			args.push("--predicate-type", "https://cyclonedx.org/bom");
+		}
+		run("gh", args);
 	}
 	const sbom = JSON.parse(readFileSync(join(directory, "adrouterCLI.cdx.json"), "utf8"));
 	if (sbom.bomFormat !== "CycloneDX") throw new Error("Release SBOM is not CycloneDX");
