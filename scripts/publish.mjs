@@ -28,6 +28,10 @@ function commandForPlatform(command) {
 	return process.platform === "win32" ? `${command}.cmd` : command;
 }
 
+function pause(milliseconds) {
+	Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+}
+
 function run(command, args, options = {}) {
 	const result = spawnSync(commandForPlatform(command), args, {
 		cwd: options.cwd,
@@ -238,10 +242,21 @@ try {
 			"--provenance",
 			"--ignore-scripts",
 		]);
-		items = stage ? stagedItems() : [];
-		states = collectStates(artifacts, items, downloadDirectory);
-		assertResumablePublication(states, version, channel);
 		const expectedStatus = stage ? "staged" : "published";
+		const visibilityDeadline = Date.now() + 5 * 60 * 1000;
+		let waitingForVisibility = false;
+		do {
+			items = stage ? stagedItems() : [];
+			states = collectStates(artifacts, items, downloadDirectory);
+			assertResumablePublication(states, version, channel);
+			if (states[index].status === expectedStatus) break;
+			if (stage || Date.now() >= visibilityDeadline) break;
+			if (!waitingForVisibility) {
+				console.log(`Waiting for npm consumer metadata for ${pkg.name}@${version} to become visible.`);
+				waitingForVisibility = true;
+			}
+			pause(5_000);
+		} while (true);
 		if (states[index].status !== expectedStatus) {
 			throw new Error(`${pkg.name}@${version} was not visible after ${expectedStatus}`);
 		}
