@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join } from "node:path";
@@ -45,12 +45,11 @@ function executable(name) {
 	return isWindows ? join(prefix, `${name}.cmd`) : join(prefix, "bin", name);
 }
 
-function run(command, args, timeout = 45_000, captureOutput = true) {
+function run(command, args, timeout = 45_000) {
 	const result = spawnSync(command, args, {
 		cwd: root,
 		encoding: "utf8",
 		env,
-		stdio: captureOutput ? "pipe" : "ignore",
 		timeout,
 	});
 	if (result.status !== 0) {
@@ -63,8 +62,41 @@ function run(command, args, timeout = 45_000, captureOutput = true) {
 	return result.stdout ?? "";
 }
 
-function runNpm(args, timeout, captureOutput) {
-	return run(npm.command, [...npm.args, ...args], timeout, captureOutput);
+function runNpm(args, timeout) {
+	return run(npm.command, [...npm.args, ...args], timeout);
+}
+
+async function installWithNpm(args, timeout) {
+	if (!isWindows) {
+		runNpm(args, timeout);
+		return;
+	}
+
+	await new Promise((resolve, reject) => {
+		const child = spawn(npm.command, [...npm.args, ...args], {
+			cwd: root,
+			env,
+			stdio: "ignore",
+			windowsHide: true,
+		});
+		const timer = setTimeout(() => {
+			spawnSync("taskkill", ["/pid", String(child.pid), "/t", "/f"], {
+				stdio: "ignore",
+				timeout: 15_000,
+				windowsHide: true,
+			});
+			reject(new Error(`npm install timed out after ${timeout}ms`));
+		}, timeout);
+		child.once("error", (error) => {
+			clearTimeout(timer);
+			reject(error);
+		});
+		child.once("exit", (code, signal) => {
+			clearTimeout(timer);
+			if (code === 0) resolve();
+			else reject(new Error(`npm install failed (status ${code}, signal ${signal ?? "none"})`));
+		});
+	});
 }
 
 function runInstalled(name, entrypoint, args) {
@@ -74,7 +106,7 @@ function runInstalled(name, entrypoint, args) {
 }
 
 try {
-	runNpm(
+	await installWithNpm(
 		[
 			"install",
 			"--global",
@@ -87,7 +119,6 @@ try {
 			`@adrouter/cli@${expectedVersion}`,
 		],
 		600_000,
-		!isWindows,
 	);
 
 	const adrouter = executable("adrouter");
