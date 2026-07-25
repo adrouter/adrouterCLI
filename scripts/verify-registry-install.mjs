@@ -21,6 +21,10 @@ const npm =
 			}
 		: { command: "npm", args: [] };
 const binDirectory = process.platform === "win32" ? prefix : join(prefix, "bin");
+const packageRoot =
+	process.platform === "win32"
+		? join(prefix, "node_modules", "@adrouter", "cli")
+		: join(prefix, "lib", "node_modules", "@adrouter", "cli");
 const env = {
 	...process.env,
 	ADROUTER_CODING_AGENT_DIR: join(root, "state"),
@@ -46,7 +50,6 @@ function run(command, args, timeout = 45_000) {
 		cwd: root,
 		encoding: "utf8",
 		env,
-		shell: process.platform === "win32" && /\.(?:cmd|bat)$/i.test(command),
 		timeout,
 	});
 	if (result.status !== 0) {
@@ -61,6 +64,12 @@ function run(command, args, timeout = 45_000) {
 
 function runNpm(args, timeout) {
 	return run(npm.command, [...npm.args, ...args], timeout);
+}
+
+function runInstalled(name, entrypoint, args) {
+	return process.platform === "win32"
+		? run(process.execPath, [join(packageRoot, entrypoint), ...args])
+		: run(executable(name), args);
 }
 
 try {
@@ -85,21 +94,19 @@ try {
 		if (!existsSync(path)) throw new Error(`Expected installed command is missing: ${path}`);
 	}
 
-	const version = run(adrouter, ["--version"]).trim();
+	const version = runInstalled("adrouter", join("dist", "cli.js"), ["--version"]).trim();
 	if (version !== expectedVersion) throw new Error(`adrouter --version returned ${version}, expected ${expectedVersion}`);
-	if (!run(adrouter, ["--help"]).includes("Usage:")) throw new Error("adrouter --help did not contain Usage:");
-	run(profile, ["list"]);
-	const doctor = JSON.parse(run(adrouter, ["--json", "doctor"]));
+	if (!runInstalled("adrouter", join("dist", "cli.js"), ["--help"]).includes("Usage:")) {
+		throw new Error("adrouter --help did not contain Usage:");
+	}
+	runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["list"]);
+	const doctor = JSON.parse(runInstalled("adrouter", join("dist", "cli.js"), ["--json", "doctor"]));
 	if (!doctor || typeof doctor !== "object") throw new Error("adrouter --json doctor did not return a JSON object");
 	if (doctor.installation?.kind !== "packaged" || doctor.installation?.deployable !== true) {
 		throw new Error(`Installed doctor rejected the package: ${JSON.stringify(doctor.installation)}`);
 	}
-	run(adrouter, ["--offline", "--no-approve", "--list-models", "adrouter"]);
+	runInstalled("adrouter", join("dist", "cli.js"), ["--offline", "--no-approve", "--list-models", "adrouter"]);
 
-	const packageRoot =
-		process.platform === "win32"
-			? join(prefix, "node_modules", "@adrouter", "cli")
-			: join(prefix, "lib", "node_modules", "@adrouter", "cli");
 	for (const resource of [
 		"package.json",
 		"BUNDLED_SOURCES.json",
@@ -122,10 +129,19 @@ try {
 	if (dependencyTree.problems?.length) {
 		throw new Error(`Global dependency tree is invalid: ${dependencyTree.problems.join(", ")}`);
 	}
-	run(profile, ["set", "registry-ci", "--provider", "adrouter", "--model", "deepseek-v4-flash"]);
-	if (!run(profile, ["list"]).includes("registry-ci")) throw new Error("Installed profile listing failed");
-	run(profile, ["apply", "registry-ci", "--cwd", root, "--no-launch"]);
-	run(profile, ["restore", "--cwd", root]);
+	runInstalled("adrouter-profile", join("dist", "profile-cli.js"), [
+		"set",
+		"registry-ci",
+		"--provider",
+		"adrouter",
+		"--model",
+		"deepseek-v4-flash",
+	]);
+	if (!runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["list"]).includes("registry-ci")) {
+		throw new Error("Installed profile listing failed");
+	}
+	runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["apply", "registry-ci", "--cwd", root, "--no-launch"]);
+	runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["restore", "--cwd", root]);
 	await verifyInstalledRuntime({
 		packageRoot,
 		project: root,
