@@ -66,6 +66,26 @@ function runNpm(args, timeout) {
 	return run(npm.command, [...npm.args, ...args], timeout);
 }
 
+function windowsInstallReady() {
+	for (const path of [
+		executable("adrouter"),
+		executable("adrouter-profile"),
+		join(packageRoot, "package.json"),
+		join(packageRoot, "dist", "cli.js"),
+		join(packageRoot, "dist", "profile-cli.js"),
+		join(packageRoot, "node_modules", "@adrouter", "ai", "dist", "index.js"),
+		join(packageRoot, "node_modules", "@adrouter", "tui", "dist", "index.js"),
+		join(packageRoot, "node_modules", "@adrouter", "agent-core", "dist", "index.js"),
+	]) {
+		if (!existsSync(path)) return false;
+	}
+	try {
+		return JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8")).version === expectedVersion;
+	} catch {
+		return false;
+	}
+}
+
 async function installWithNpm(args, timeout) {
 	if (!isWindows) {
 		runNpm(args, timeout);
@@ -79,22 +99,35 @@ async function installWithNpm(args, timeout) {
 			stdio: "ignore",
 			windowsHide: true,
 		});
-		const timer = setTimeout(() => {
-			spawnSync("taskkill", ["/pid", String(child.pid), "/t", "/f"], {
-				stdio: "ignore",
-				timeout: 15_000,
-				windowsHide: true,
-			});
-			reject(new Error(`npm install timed out after ${timeout}ms`));
+		child.unref();
+		let settled = false;
+		let readyChecks = 0;
+		let readiness;
+		let timer;
+		const finish = (error) => {
+			if (settled) return;
+			settled = true;
+			clearInterval(readiness);
+			clearTimeout(timer);
+			if (error) reject(error);
+			else resolve();
+		};
+		readiness = setInterval(() => {
+			readyChecks = windowsInstallReady() ? readyChecks + 1 : 0;
+			if (readyChecks < 2) return;
+			child.kill();
+			finish();
+		}, 1_000);
+		timer = setTimeout(() => {
+			child.kill();
+			finish(new Error(`npm install timed out after ${timeout}ms`));
 		}, timeout);
 		child.once("error", (error) => {
-			clearTimeout(timer);
-			reject(error);
+			finish(error);
 		});
 		child.once("exit", (code, signal) => {
-			clearTimeout(timer);
-			if (code === 0) resolve();
-			else reject(new Error(`npm install failed (status ${code}, signal ${signal ?? "none"})`));
+			if (code === 0) finish();
+			else finish(new Error(`npm install failed (status ${code}, signal ${signal ?? "none"})`));
 		});
 	});
 }
