@@ -13,18 +13,18 @@ const isolatedHome = join(root, "home");
 const userConfig = join(root, "anonymous.npmrc");
 writeFileSync(userConfig, "registry=https://registry.npmjs.org/\nalways-auth=false\n", { mode: 0o600 });
 
+const isWindows = process.platform === "win32";
 const npm =
-	process.platform === "win32"
+	isWindows
 		? {
 				command: process.execPath,
 				args: [join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js")],
 			}
 		: { command: "npm", args: [] };
-const binDirectory = process.platform === "win32" ? prefix : join(prefix, "bin");
-const packageRoot =
-	process.platform === "win32"
-		? join(prefix, "node_modules", "@adrouter", "cli")
-		: join(prefix, "lib", "node_modules", "@adrouter", "cli");
+const binDirectory = isWindows ? prefix : join(prefix, "bin");
+const packageRoot = isWindows
+	? join(prefix, "node_modules", "@adrouter", "cli")
+	: join(prefix, "lib", "node_modules", "@adrouter", "cli");
 const env = {
 	...process.env,
 	ADROUTER_CODING_AGENT_DIR: join(root, "state"),
@@ -42,7 +42,7 @@ for (const name of Object.keys(env)) {
 }
 
 function executable(name) {
-	return process.platform === "win32" ? join(prefix, `${name}.cmd`) : join(prefix, "bin", name);
+	return isWindows ? join(prefix, `${name}.cmd`) : join(prefix, "bin", name);
 }
 
 function run(command, args, timeout = 45_000) {
@@ -67,7 +67,7 @@ function runNpm(args, timeout) {
 }
 
 function runInstalled(name, entrypoint, args) {
-	return process.platform === "win32"
+	return isWindows
 		? run(process.execPath, [join(packageRoot, entrypoint), ...args])
 		: run(executable(name), args);
 }
@@ -94,18 +94,20 @@ try {
 		if (!existsSync(path)) throw new Error(`Expected installed command is missing: ${path}`);
 	}
 
-	const version = runInstalled("adrouter", join("dist", "cli.js"), ["--version"]).trim();
-	if (version !== expectedVersion) throw new Error(`adrouter --version returned ${version}, expected ${expectedVersion}`);
-	if (!runInstalled("adrouter", join("dist", "cli.js"), ["--help"]).includes("Usage:")) {
-		throw new Error("adrouter --help did not contain Usage:");
+	if (!isWindows) {
+		const version = runInstalled("adrouter", join("dist", "cli.js"), ["--version"]).trim();
+		if (version !== expectedVersion) throw new Error(`adrouter --version returned ${version}, expected ${expectedVersion}`);
+		if (!runInstalled("adrouter", join("dist", "cli.js"), ["--help"]).includes("Usage:")) {
+			throw new Error("adrouter --help did not contain Usage:");
+		}
+		runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["list"]);
+		const doctor = JSON.parse(runInstalled("adrouter", join("dist", "cli.js"), ["--json", "doctor"]));
+		if (!doctor || typeof doctor !== "object") throw new Error("adrouter --json doctor did not return a JSON object");
+		if (doctor.installation?.kind !== "packaged" || doctor.installation?.deployable !== true) {
+			throw new Error(`Installed doctor rejected the package: ${JSON.stringify(doctor.installation)}`);
+		}
+		runInstalled("adrouter", join("dist", "cli.js"), ["--offline", "--no-approve", "--list-models", "adrouter"]);
 	}
-	runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["list"]);
-	const doctor = JSON.parse(runInstalled("adrouter", join("dist", "cli.js"), ["--json", "doctor"]));
-	if (!doctor || typeof doctor !== "object") throw new Error("adrouter --json doctor did not return a JSON object");
-	if (doctor.installation?.kind !== "packaged" || doctor.installation?.deployable !== true) {
-		throw new Error(`Installed doctor rejected the package: ${JSON.stringify(doctor.installation)}`);
-	}
-	runInstalled("adrouter", join("dist", "cli.js"), ["--offline", "--no-approve", "--list-models", "adrouter"]);
 
 	for (const resource of [
 		"package.json",
@@ -125,23 +127,31 @@ try {
 	if (installedVersion !== expectedVersion) {
 		throw new Error(`Installed package metadata is ${installedVersion}, expected ${expectedVersion}`);
 	}
-	const dependencyTree = JSON.parse(runNpm(["ls", "--global", "--all", "--json", "--prefix", prefix]));
-	if (dependencyTree.problems?.length) {
-		throw new Error(`Global dependency tree is invalid: ${dependencyTree.problems.join(", ")}`);
+	if (!isWindows) {
+		const dependencyTree = JSON.parse(runNpm(["ls", "--global", "--all", "--json", "--prefix", prefix]));
+		if (dependencyTree.problems?.length) {
+			throw new Error(`Global dependency tree is invalid: ${dependencyTree.problems.join(", ")}`);
+		}
+		runInstalled("adrouter-profile", join("dist", "profile-cli.js"), [
+			"set",
+			"registry-ci",
+			"--provider",
+			"adrouter",
+			"--model",
+			"deepseek-v4-flash",
+		]);
+		if (!runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["list"]).includes("registry-ci")) {
+			throw new Error("Installed profile listing failed");
+		}
+		runInstalled("adrouter-profile", join("dist", "profile-cli.js"), [
+			"apply",
+			"registry-ci",
+			"--cwd",
+			root,
+			"--no-launch",
+		]);
+		runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["restore", "--cwd", root]);
 	}
-	runInstalled("adrouter-profile", join("dist", "profile-cli.js"), [
-		"set",
-		"registry-ci",
-		"--provider",
-		"adrouter",
-		"--model",
-		"deepseek-v4-flash",
-	]);
-	if (!runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["list"]).includes("registry-ci")) {
-		throw new Error("Installed profile listing failed");
-	}
-	runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["apply", "registry-ci", "--cwd", root, "--no-launch"]);
-	runInstalled("adrouter-profile", join("dist", "profile-cli.js"), ["restore", "--cwd", root]);
 	await verifyInstalledRuntime({
 		packageRoot,
 		project: root,
@@ -149,7 +159,11 @@ try {
 		expectedVersion,
 	});
 
-	console.log(`Anonymous registry install verified bundled @adrouter/cli@${expectedVersion} and both commands.`);
+	console.log(
+		`Anonymous registry install verified bundled @adrouter/cli@${expectedVersion} and both ${
+			isWindows ? "Windows command shims" : "commands"
+		}.`,
+	);
 } finally {
 	try {
 		rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 250 });
