@@ -112,7 +112,6 @@ jobs:
           - platform: darwin-arm64
             os: macos-15
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
     permissions:
       contents: read
     steps:
