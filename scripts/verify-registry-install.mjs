@@ -45,25 +45,26 @@ function executable(name) {
 	return isWindows ? join(prefix, `${name}.cmd`) : join(prefix, "bin", name);
 }
 
-function run(command, args, timeout = 45_000) {
+function run(command, args, timeout = 45_000, captureOutput = true) {
 	const result = spawnSync(command, args, {
 		cwd: root,
 		encoding: "utf8",
 		env,
+		stdio: captureOutput ? "pipe" : "ignore",
 		timeout,
 	});
 	if (result.status !== 0) {
 		throw new Error(
 			`${command} ${args.join(" ")} failed (status ${result.status}, signal ${result.signal ?? "none"}, error ${
 				result.error?.message ?? "none"
-			})\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
+			})\nSTDOUT:\n${result.stdout ?? ""}\nSTDERR:\n${result.stderr ?? ""}`,
 		);
 	}
-	return result.stdout;
+	return result.stdout ?? "";
 }
 
-function runNpm(args, timeout) {
-	return run(npm.command, [...npm.args, ...args], timeout);
+function runNpm(args, timeout, captureOutput) {
+	return run(npm.command, [...npm.args, ...args], timeout, captureOutput);
 }
 
 function runInstalled(name, entrypoint, args) {
@@ -86,6 +87,7 @@ try {
 			`@adrouter/cli@${expectedVersion}`,
 		],
 		600_000,
+		!isWindows,
 	);
 
 	const adrouter = executable("adrouter");
