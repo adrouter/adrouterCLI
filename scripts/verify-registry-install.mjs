@@ -171,3 +171,8 @@ try {
 		console.warn(`Could not remove isolated registry-install directory ${root}: ${error.message}`);
 	}
 }
+
+// Imported packaged modules can retain Windows event-loop handles after every
+// verification has passed. Exit explicitly only on the successful path; thrown
+// verification errors bypass this statement and retain their nonzero exit.
+process.exit(0);
