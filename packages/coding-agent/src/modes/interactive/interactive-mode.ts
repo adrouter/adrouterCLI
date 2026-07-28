@@ -522,6 +522,7 @@ export class InteractiveMode {
 			const footerMetrics = this.footer.getMetrics();
 			return {
 				...footerMetrics,
+				extensionStatuses: this.customFooter ? [] : footerMetrics.extensionStatuses,
 				profileName: this.profileNameCache.profileName,
 				modeLabel: shellMode ? "Shell" : APP_NAME,
 			};
@@ -532,6 +533,7 @@ export class InteractiveMode {
 		this.footerDataProvider = new FooterDataProvider(this.sessionManager.getCwd());
 		this.footer = new FooterComponent(this.session, this.footerDataProvider);
 		this.footer.setAutoCompactEnabled(this.session.autoCompactionEnabled);
+		this.footer.setStatusesEmbeddedInEditor(true);
 
 		// Load hide thinking block setting
 		this.hideThinkingBlock = this.settingsManager.getHideThinkingBlock();
@@ -1976,6 +1978,7 @@ export class InteractiveMode {
 		} else {
 			// Restore built-in footer
 			this.customFooter = undefined;
+			this.footer.setStatusesEmbeddedInEditor(!this.editorComponentFactory);
 			this.ui.addChild(this.footer);
 		}
 
@@ -2292,6 +2295,7 @@ export class InteractiveMode {
 	 */
 	private setCustomEditorComponent(factory: EditorFactory | undefined): void {
 		this.editorComponentFactory = factory;
+		this.footer.setStatusesEmbeddedInEditor(!factory);
 
 		// Save text from current editor before switching
 		const currentText = this.editor.getText();

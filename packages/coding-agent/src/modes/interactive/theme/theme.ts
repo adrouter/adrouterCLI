@@ -96,6 +96,11 @@ const ThemeJsonSchema = Type.Object({
 		sponsoredHighlight: ColorValueSchema,
 		sponsoredLabel: ColorValueSchema,
 		sponsoredText: ColorValueSchema,
+		sponsoredFooterHighlight: Type.Optional(ColorValueSchema),
+		sponsoredFooterText: Type.Optional(ColorValueSchema),
+		sponsoredFooterMuted: Type.Optional(ColorValueSchema),
+		sponsoredFooterLink: Type.Optional(ColorValueSchema),
+		sponsoredNoneHighlight: Type.Optional(ColorValueSchema),
 		subsidy: ColorValueSchema,
 	}),
 	export: Type.Optional(
@@ -160,6 +165,9 @@ export type ThemeColor =
 	| "bashMode"
 	| "sponsoredLabel"
 	| "sponsoredText"
+	| "sponsoredFooterText"
+	| "sponsoredFooterMuted"
+	| "sponsoredFooterLink"
 	| "subsidy";
 
 export type ThemeBg =
@@ -169,7 +177,9 @@ export type ThemeBg =
 	| "toolPendingBg"
 	| "toolSuccessBg"
 	| "toolErrorBg"
-	| "sponsoredHighlight";
+	| "sponsoredHighlight"
+	| "sponsoredFooterHighlight"
+	| "sponsoredNoneHighlight";
 
 type ColorMode = "truecolor" | "256color";
 
@@ -328,13 +338,24 @@ function resolveThemeColors<T extends Record<string, ColorValue>>(
 	return resolved as Record<keyof T, string | number>;
 }
 
-function withThemeColorFallbacks(
-	colors: ThemeJson["colors"],
-): ThemeJson["colors"] & { thinkingMax: ColorValue; sponsoredHighlight: ColorValue } {
+function withThemeColorFallbacks(colors: ThemeJson["colors"]): ThemeJson["colors"] & {
+	thinkingMax: ColorValue;
+	sponsoredHighlight: ColorValue;
+	sponsoredFooterHighlight: ColorValue;
+	sponsoredFooterText: ColorValue;
+	sponsoredFooterMuted: ColorValue;
+	sponsoredFooterLink: ColorValue;
+	sponsoredNoneHighlight: ColorValue;
+} {
 	return {
 		...colors,
 		thinkingMax: colors.thinkingMax ?? colors.thinkingXhigh,
 		sponsoredHighlight: colors.sponsoredHighlight ?? colors.customMessageBg,
+		sponsoredFooterHighlight: colors.sponsoredFooterHighlight ?? colors.sponsoredHighlight ?? colors.customMessageBg,
+		sponsoredFooterText: colors.sponsoredFooterText ?? colors.sponsoredText,
+		sponsoredFooterMuted: colors.sponsoredFooterMuted ?? colors.muted,
+		sponsoredFooterLink: colors.sponsoredFooterLink ?? colors.sponsoredLabel,
+		sponsoredNoneHighlight: colors.sponsoredNoneHighlight ?? colors.customMessageBg,
 	};
 }
 
@@ -622,6 +643,8 @@ function createTheme(themeJson: ThemeJson, mode?: ColorMode, sourcePath?: string
 		"toolSuccessBg",
 		"toolErrorBg",
 		"sponsoredHighlight",
+		"sponsoredFooterHighlight",
+		"sponsoredNoneHighlight",
 	]);
 	for (const [key, value] of Object.entries(resolvedColors)) {
 		if (bgColorKeys.has(key)) {

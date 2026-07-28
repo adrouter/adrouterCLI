@@ -27,7 +27,7 @@ function createMetadata(overrides: Partial<EditorMetadata> = {}): EditorMetadata
 		thinkingLabel: "high",
 		contextTokens: 24_600,
 		contextWindow: 200_000,
-		cacheHitRate: 37.5,
+		extensionStatuses: ["OpenAI cache 3/10 · 0.002M/0.005M tok (40%)"],
 		totalCost: 1.234,
 		totalSubsidy: 0.234,
 		effectiveCost: 1,
@@ -56,21 +56,22 @@ describe.sequential("CustomEditor input panel", () => {
 		initTheme("dark", false);
 	});
 
-	it("renders the requested metadata in order around a blue-framed prompt", () => {
+	it("renders the requested metadata with exactly two unframed rows below the prompt", () => {
 		chalk.level = 0;
 		process.env.NO_COLOR = "1";
 		const lines = createEditor(140).render(140);
 		const plain = lines.map(stripAnsi);
 
 		expect(plain).toHaveLength(5);
-		expect(plain[0]).toMatch(/\/tmp\/project \(main\) ─$/);
-		expect(plain[1]).toMatch(/^─ deepseek-live loaded/);
-		expect(plain[1]).toMatch(/demo ─$/);
+		expect(plain[0]).toMatch(/\/tmp\/project \(main\)$/);
+		expect(plain[1]).toMatch(/^deepseek-live loaded/);
+		expect(plain[1]).toMatch(/demo$/);
 		expect(plain[2]).toMatch(/^❯ {2}Ask anything\.\.\./);
-		expect(plain[3]).toMatch(/^─ context 25k\/200k auto/);
-		expect(plain[3]).toMatch(/adrouter · deepseek-v4-flash · thinking high ─$/);
-		expect(plain[4]).toMatch(/^─ cost \$1\.234 · subsidy \$0\.234 · effective \$1\.000/);
-		expect(plain[4]).toMatch(/cache 37\.5% ─$/);
+		expect(plain[3]).toMatch(/^context 25k\/200k auto/);
+		expect(plain[3]).toMatch(/adrouter · deepseek-v4-flash · thinking high$/);
+		expect(plain[4]).toMatch(/^OpenAI cache 3\/10/);
+		expect(plain[4]).toMatch(/cost \$1\.234 - subsidy \$0\.234 = effective \$1\.000$/);
+		expect(plain.join("\n")).not.toContain("─");
 		expect(lines.every((line) => visibleWidth(line) === 140)).toBe(true);
 	});
 
@@ -82,7 +83,7 @@ describe.sequential("CustomEditor input panel", () => {
 			createMetadata({
 				profileName: undefined,
 				contextTokens: null,
-				cacheHitRate: 0,
+				extensionStatuses: [],
 				totalCost: 0,
 				totalSubsidy: 0,
 				effectiveCost: 0,
@@ -93,7 +94,7 @@ describe.sequential("CustomEditor input panel", () => {
 
 		expect(lines[1]).toContain("no profile loaded");
 		expect(lines.at(-2)).toContain("context ?/200k auto");
-		expect(lines.at(-1)).toContain("cache 0.0%");
+		expect(lines.at(-1)).not.toContain("cache 0.0%");
 		expect(lines.at(-1)).toContain("effective $0.000000");
 	});
 

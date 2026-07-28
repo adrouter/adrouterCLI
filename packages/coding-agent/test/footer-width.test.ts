@@ -99,16 +99,20 @@ describe("formatCwdForFooter", () => {
 });
 
 describe("footer session metrics", () => {
-	it("calculates aggregate cache hit rate across every prompt", () => {
+	it("collects cost and puts pi-cache-optimizer status first", () => {
+		const statuses = new Map([
+			["z-status", "other"],
+			["pi-cache-stats", "OpenAI cache 3/10 · 0.002M/0.005M tok (40%)"],
+		]);
 		const session = createSession({
 			usage: [
 				{ input: 100, output: 10, cacheRead: 50, cacheWrite: 50, cost: { total: 0.1 } },
 				{ input: 100, output: 20, cacheRead: 100, cacheWrite: 0, cost: { total: 0.2 } },
 			],
 		});
-		const metrics = collectFooterMetrics(session, createFooterData());
+		const metrics = collectFooterMetrics(session, createFooterData(statuses));
 
-		expect(metrics.cacheHitRate).toBeCloseTo(37.5);
+		expect(metrics.extensionStatuses).toEqual(["OpenAI cache 3/10 · 0.002M/0.005M tok (40%)", "other"]);
 		expect(metrics.totalCost).toBeCloseTo(0.3);
 	});
 
@@ -119,7 +123,7 @@ describe("footer session metrics", () => {
 		);
 		expect(metrics.contextTokens).toBeNull();
 		expect(metrics.contextWindow).toBe(200_000);
-		expect(metrics.cacheHitRate).toBe(0);
+		expect(metrics.extensionStatuses).toEqual([]);
 		expect(metrics.totalCost).toBe(0);
 	});
 
@@ -142,14 +146,24 @@ describe("FooterComponent status continuation", () => {
 	it("renders extension statuses in deterministic order and within width", () => {
 		const statuses = new Map([
 			["z", "second\nstatus"],
-			["a", "first status"],
+			["pi-cache-stats", "cache\x1b[31m status"],
+			["a", "first\tstatus"],
 		]);
 		const footer = new FooterComponent(createSession(), createFooterData(statuses));
 		const lines = footer.render(24);
 
 		expect(lines).toHaveLength(1);
-		expect(stripAnsi(lines[0]!)).toMatch(/^first status {2}second/);
+		expect(stripAnsi(lines[0]!)).toMatch(/^cache status {2}first s/);
 		expect(visibleWidth(lines[0]!)).toBeLessThanOrEqual(24);
+	});
+
+	it("does not add a third row when statuses are embedded in the built-in editor", () => {
+		const footer = new FooterComponent(
+			createSession(),
+			createFooterData(new Map([["pi-cache-stats", "OpenAI cache 3/10"]])),
+		);
+		footer.setStatusesEmbeddedInEditor(true);
+		expect(footer.render(80)).toEqual([]);
 	});
 
 	it("does not reserve a row when no extension status exists", () => {

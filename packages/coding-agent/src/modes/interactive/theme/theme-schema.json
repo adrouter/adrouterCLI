@@ -313,6 +313,26 @@
 					"$ref": "#/$defs/colorValue",
 					"description": "Sponsored Tier A content text"
 				},
+				"sponsoredFooterHighlight": {
+					"$ref": "#/$defs/colorValue",
+					"description": "Background for the three-row footer sponsorship panel"
+				},
+				"sponsoredFooterText": {
+					"$ref": "#/$defs/colorValue",
+					"description": "Primary text in the footer sponsorship panel"
+				},
+				"sponsoredFooterMuted": {
+					"$ref": "#/$defs/colorValue",
+					"description": "Muted label text in the footer sponsorship panel"
+				},
+				"sponsoredFooterLink": {
+					"$ref": "#/$defs/colorValue",
+					"description": "Link text in the footer sponsorship panel"
+				},
+				"sponsoredNoneHighlight": {
+					"$ref": "#/$defs/colorValue",
+					"description": "Background for compact Tier NONE footer outcomes"
+				},
 				"subsidy": {
 					"$ref": "#/$defs/colorValue",
 					"description": "Saved subsidy text"

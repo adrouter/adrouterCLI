@@ -29,7 +29,7 @@ export interface EditorMetadata {
 	thinkingLabel?: string;
 	contextTokens?: number | null;
 	contextWindow?: number;
-	cacheHitRate?: number;
+	extensionStatuses?: string[];
 	totalCost?: number;
 	totalSubsidy?: number;
 	effectiveCost?: number;
@@ -92,10 +92,8 @@ export class CustomEditor extends Editor {
 		const directory = [meta.cwd, meta.gitBranch ? `(${meta.gitBranch})` : undefined].filter(Boolean).join(" ");
 		const profile = meta.profileName ? `${meta.profileName} loaded` : "no profile loaded";
 		const sessionName = meta.sessionName || "no session name";
-		result.push(this.renderFramedSplitLine("", panelColor("dim", directory || "~"), width));
-		result.push(
-			this.renderFramedSplitLine(panelColor("dim", profile), panelColor("dim", sessionName), width, "left"),
-		);
+		result.push(this.renderSplitLine("", panelColor("dim", directory || "~"), width));
+		result.push(this.renderSplitLine(panelColor("dim", profile), panelColor("dim", sessionName), width, "left"));
 
 		const foregroundSample = chalk.level === 0 || process.env.NO_COLOR ? "" : this.borderColor("");
 		const foreground = foregroundSample.match(/\x1b\[38[^m]*m/)?.[0];
@@ -167,7 +165,7 @@ export class CustomEditor extends Editor {
 			`thinking ${meta.thinkingLabel || "off"}`,
 		].join(" · ");
 		result.push(
-			this.renderFramedSplitLine(
+			this.renderSplitLine(
 				panelColor("dim", this.renderContextStatus(meta, width)),
 				panelColor("dim", modelStatus),
 				width,
@@ -175,7 +173,11 @@ export class CustomEditor extends Editor {
 			),
 		);
 		result.push(
-			this.renderFramedSplitLine(this.renderCostStatus(meta, width), this.renderCacheStatus(meta, width), width),
+			this.renderSplitLine(
+				panelColor("dim", (meta.extensionStatuses ?? []).join("  ")),
+				this.renderCostStatus(meta, width),
+				width,
+			),
 		);
 		return result;
 	}
@@ -188,11 +190,6 @@ export class CustomEditor extends Editor {
 		return `${width < 96 ? "ctx" : "context"} ${contextCurrent}/${contextMax}${auto}`;
 	}
 
-	private renderCacheStatus(meta: EditorMetadata, width: number): string {
-		const hitRate = Math.max(0, Math.min(100, meta.cacheHitRate ?? 0));
-		return `${width < 96 ? "CH" : "cache "}${hitRate.toFixed(1)}%`;
-	}
-
 	private renderCostStatus(meta: EditorMetadata, width: number): string {
 		const totalCost = Math.max(0, meta.totalCost ?? 0);
 		const totalSubsidy = Math.max(0, meta.totalSubsidy ?? 0);
@@ -200,26 +197,21 @@ export class CustomEditor extends Editor {
 		const parts =
 			width < 96
 				? [
-						panelColor("muted", `Σ$${totalCost.toFixed(3)}`),
-						panelColor("subsidy", `+$${formatAdRouterSubsidy(totalSubsidy)}`),
-						panelColor("success", `=$${formatAdRouterSubsidy(effectiveCost)}`),
+						panelColor("muted", `$${totalCost.toFixed(3)}`),
+						panelColor("subsidy", `$${formatAdRouterSubsidy(totalSubsidy)}`),
+						panelColor("success", `$${formatAdRouterSubsidy(effectiveCost)}`),
 					]
 				: [
 						panelColor("muted", `cost $${totalCost.toFixed(3)}`),
 						panelColor("subsidy", `subsidy $${formatAdRouterSubsidy(totalSubsidy)}`),
 						panelColor("success", `effective $${formatAdRouterSubsidy(effectiveCost)}`),
 					];
-		return parts.join(" · ");
+		return `${parts[0]} ${panelColor("muted", "-")} ${parts[1]} ${panelColor("muted", "=")} ${parts[2]}`;
 	}
 
-	private renderFramedSplitLine(
-		left: string,
-		right: string,
-		width: number,
-		priority: "left" | "right" = "right",
-	): string {
-		if (width <= 4) return panelColor("border", "─".repeat(Math.max(0, width)));
-		const bodyWidth = width - 4;
+	private renderSplitLine(left: string, right: string, width: number, priority: "left" | "right" = "right"): string {
+		if (width <= 0) return "";
+		const bodyWidth = width;
 		let leftText: string;
 		let rightText: string;
 		if (priority === "left") {
@@ -235,14 +227,12 @@ export class CustomEditor extends Editor {
 		}
 		const rightWidth = visibleWidth(rightText);
 		const leftWidth = visibleWidth(leftText);
-		const gap = Math.max(0, bodyWidth - leftWidth - rightWidth - (leftText && rightText ? 2 : 0));
-		const middle =
-			leftText && rightText
-				? `${leftText} ${panelColor("border", "─".repeat(gap))} ${rightText}`
-				: leftText
-					? `${leftText}${panelColor("border", "─".repeat(gap))}`
-					: `${panelColor("border", "─".repeat(gap))}${rightText}`;
-		return `${panelColor("border", "─ ")}${middle}${panelColor("border", " ─")}`;
+		const gap = Math.max(0, bodyWidth - leftWidth - rightWidth);
+		return leftText && rightText
+			? `${leftText}${" ".repeat(gap)}${rightText}`
+			: leftText
+				? `${leftText}${" ".repeat(gap)}`
+				: `${" ".repeat(gap)}${rightText}`;
 	}
 
 	yieldInputToTranscriptSelection(data: string, context: TranscriptSelectionYieldContext): boolean {

@@ -42,4 +42,32 @@ describe("max thinking level", () => {
 			legacyTheme.getThinkingBorderColor("xhigh")("border"),
 		);
 	});
+
+	it("loads legacy themes without footer-specific sponsor colors", () => {
+		const testDir = mkdtempSync(join(tmpdir(), "pi-sponsor-theme-"));
+		tempDirs.push(testDir);
+		const currentDir = dirname(fileURLToPath(import.meta.url));
+		const darkTheme = JSON.parse(
+			readFileSync(join(currentDir, "../src/modes/interactive/theme/dark.json"), "utf8"),
+		) as { name: string; colors: Record<string, unknown> };
+		darkTheme.name = "legacy-sponsor-theme";
+		for (const key of [
+			"sponsoredFooterHighlight",
+			"sponsoredFooterText",
+			"sponsoredFooterMuted",
+			"sponsoredFooterLink",
+			"sponsoredNoneHighlight",
+		]) {
+			delete darkTheme.colors[key];
+		}
+		const themePath = join(testDir, "legacy-sponsor-theme.json");
+		writeFileSync(themePath, JSON.stringify(darkTheme));
+
+		const legacyTheme = loadThemeFromPath(themePath);
+		expect(legacyTheme.getBgAnsi("sponsoredFooterHighlight")).toBe(legacyTheme.getBgAnsi("sponsoredHighlight"));
+		expect(legacyTheme.getFgAnsi("sponsoredFooterText")).toBe(legacyTheme.getFgAnsi("sponsoredText"));
+		expect(legacyTheme.getFgAnsi("sponsoredFooterMuted")).toBe(legacyTheme.getFgAnsi("muted"));
+		expect(legacyTheme.getFgAnsi("sponsoredFooterLink")).toBe(legacyTheme.getFgAnsi("sponsoredLabel"));
+		expect(legacyTheme.getBgAnsi("sponsoredNoneHighlight")).toBe(legacyTheme.getBgAnsi("customMessageBg"));
+	});
 });

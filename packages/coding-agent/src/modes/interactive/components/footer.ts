@@ -16,7 +16,7 @@ export interface FooterMetrics {
 	thinkingLabel: string;
 	contextTokens: number | null;
 	contextWindow: number;
-	cacheHitRate: number;
+	extensionStatuses: string[];
 	totalCost: number;
 	totalSubsidy: number;
 	effectiveCost: number;
@@ -28,9 +28,26 @@ export interface FooterMetrics {
  */
 function sanitizeStatusText(text: string): string {
 	return text
+		.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "")
 		.replace(/[\r\n\t]/g, " ")
+		.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/g, "")
 		.replace(/ +/g, " ")
 		.trim();
+}
+
+const CACHE_STATUS_KEY = "pi-cache-stats";
+
+function collectExtensionStatuses(footerData: ReadonlyFooterDataProvider): string[] {
+	const statusParts = Array.from(footerData.getExtensionStatuses().entries())
+		.sort(([a], [b]) => {
+			if (a === CACHE_STATUS_KEY) return b === CACHE_STATUS_KEY ? 0 : -1;
+			if (b === CACHE_STATUS_KEY) return 1;
+			return a.localeCompare(b);
+		})
+		.map(([, text]) => sanitizeStatusText(text))
+		.filter(Boolean);
+	if (areExperimentalFeaturesEnabled()) statusParts.push("• xp");
+	return statusParts;
 }
 
 /** Format token counts for compact footer display. */
@@ -62,16 +79,12 @@ export function collectFooterMetrics(
 	footerData: ReadonlyFooterDataProvider,
 	autoCompactEnabled = true,
 ): FooterMetrics {
-	let totalPromptTokens = 0;
-	let totalCacheRead = 0;
 	let totalCost = 0;
 
 	const entries = session.sessionManager.getEntries();
 	for (const entry of entries) {
 		if (entry.type !== "message" || entry.message.role !== "assistant") continue;
 		const usage = entry.message.usage;
-		totalPromptTokens += usage.input + usage.cacheRead + usage.cacheWrite;
-		totalCacheRead += usage.cacheRead;
 		totalCost += usage.cost.total;
 	}
 
@@ -88,7 +101,7 @@ export function collectFooterMetrics(
 		thinkingLabel: session.state.thinkingLevel || "off",
 		contextTokens: contextUsage?.tokens ?? null,
 		contextWindow: contextUsage?.contextWindow ?? model?.contextWindow ?? 0,
-		cacheHitRate: totalPromptTokens > 0 ? (totalCacheRead / totalPromptTokens) * 100 : 0,
+		extensionStatuses: collectExtensionStatuses(footerData),
 		totalCost,
 		totalSubsidy,
 		effectiveCost: Math.max(0, totalCost - totalSubsidy),
@@ -102,6 +115,7 @@ export function collectFooterMetrics(
  */
 export class FooterComponent implements Component {
 	private autoCompactEnabled = true;
+	private statusesEmbeddedInEditor = false;
 	private session: AgentSession;
 	private footerData: ReadonlyFooterDataProvider;
 
@@ -118,6 +132,10 @@ export class FooterComponent implements Component {
 		this.autoCompactEnabled = enabled;
 	}
 
+	setStatusesEmbeddedInEditor(embedded: boolean): void {
+		this.statusesEmbeddedInEditor = embedded;
+	}
+
 	getMetrics(): FooterMetrics {
 		return collectFooterMetrics(this.session, this.footerData, this.autoCompactEnabled);
 	}
@@ -131,14 +149,8 @@ export class FooterComponent implements Component {
 	}
 
 	render(width: number): string[] {
-		if (width <= 0) return [];
-		const statusParts = Array.from(this.footerData.getExtensionStatuses().entries())
-			.sort(([a], [b]) => a.localeCompare(b))
-			.map(([, text]) => sanitizeStatusText(text))
-			.filter(Boolean);
-		if (areExperimentalFeaturesEnabled()) {
-			statusParts.push(`${theme.fg("dim", "•")} ${theme.bold(theme.fg("warning", "xp"))}`);
-		}
+		if (width <= 0 || this.statusesEmbeddedInEditor) return [];
+		const statusParts = collectExtensionStatuses(this.footerData);
 		if (statusParts.length === 0) return [];
 		return [truncateToWidth(theme.fg("dim", statusParts.join("  ")), width, theme.fg("dim", "..."))];
 	}

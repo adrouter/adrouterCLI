@@ -81,6 +81,11 @@
 		"sponsoredHighlight": "#17364a",
 		"sponsoredLabel": "#8fcfff",
 		"sponsoredText": "text",
+		"sponsoredFooterHighlight": "#17364a",
+		"sponsoredFooterText": "#f0f4f8",
+		"sponsoredFooterMuted": "#a6b0ba",
+		"sponsoredFooterLink": "#8fcfff",
+		"sponsoredNoneHighlight": "#343434",
 		"subsidy": "#8fcfff"
 	},
 	"export": {

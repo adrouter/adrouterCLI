@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Reduced the built-in input footer to two unframed status rows, using the cache optimizer's model
+  cache status alongside the existing colored cost, subsidy, and effective-cost equation.
+- Expanded sponsored footer placements to three highlighted rows for sponsor identity, message, and
+  call-to-action links, with a dark-blue sponsored background and grey Tier NONE treatment.
+
 ## [0.81.0-beta.9] - 2026-07-28
 
 ### Added
