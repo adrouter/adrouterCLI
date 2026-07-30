@@ -80,6 +80,7 @@ export function createBundledCliTarball({ outputDirectory, repoRoot = process.cw
 				"--ignore-scripts",
 				"--no-audit",
 				"--no-fund",
+				"--legacy-peer-deps",
 				"--omit=dev",
 				"--no-save",
 				...internalTarballs,
