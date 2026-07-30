@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { delimiter, join } from "node:path";
-import { verifyInstalledRuntime } from "./verify-installed-runtime.mjs";
+import { assertAdRouterOfflineModelList, verifyInstalledRuntime } from "./verify-installed-runtime.mjs";
 
 const PACKAGE_NAME = "@adrouter/cli";
 const REGISTRY_URL = "https://registry.npmjs.org/";
@@ -30,6 +30,8 @@ const packageRoot = isWindows
 	: join(prefix, "lib", "node_modules", "@adrouter", "cli");
 const env = {
 	...process.env,
+	ADROUTER_API_KEY: "offline-catalog-fixture",
+	ADROUTER_API_URL: "http://127.0.0.1:1",
 	ADROUTER_CODING_AGENT_DIR: join(root, "state"),
 	HOME: isolatedHome,
 	NPM_CONFIG_PREFIX: prefix,
@@ -239,7 +241,14 @@ async function verifyInstalledCandidate() {
 		if (doctor.installation?.kind !== "packaged" || doctor.installation?.deployable !== true) {
 			throw new Error(`Installed doctor rejected the package: ${JSON.stringify(doctor.installation)}`);
 		}
-		runInstalled("adrouter", join("dist", "cli.js"), ["--offline", "--no-approve", "--list-models", "adrouter"]);
+		assertAdRouterOfflineModelList(
+			runInstalled("adrouter", join("dist", "cli.js"), [
+				"--offline",
+				"--no-approve",
+				"--list-models",
+				"adrouter",
+			]),
+		);
 	}
 
 	for (const resource of [

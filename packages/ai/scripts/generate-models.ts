@@ -2180,9 +2180,42 @@ async function generateModels() {
 		}));
 	allModels.push(...azureOpenAiModels);
 
+	const adrouterThinkingLevels = {
+		deepseek: {
+			off: "none",
+			minimal: null,
+			low: null,
+			medium: "medium",
+			high: "high",
+			xhigh: null,
+			max: null,
+		},
+		flash: {
+			off: "none",
+			minimal: null,
+			low: null,
+			medium: null,
+			high: "high",
+			xhigh: null,
+			max: null,
+		},
+		pro: {
+			off: null,
+			minimal: null,
+			low: null,
+			medium: null,
+			high: "high",
+			xhigh: null,
+			max: null,
+		},
+	} as const;
 	for (const model of [
-		{ id: "deepseek-v4-flash", name: "AdRouter DeepSeek V4 Flash" },
-		{ id: "deepseek-v4-pro", name: "AdRouter DeepSeek V4 Pro" },
+		{ id: "deepseek-v4-flash", name: "AdRouter DeepSeek V4 Flash", thinkingLevelMap: adrouterThinkingLevels.deepseek },
+		{ id: "deepseek-v4-pro", name: "AdRouter DeepSeek V4 Pro", thinkingLevelMap: adrouterThinkingLevels.deepseek },
+		{ id: "mimo-v2.5", name: "AdRouter MiMo V2.5 Flash", thinkingLevelMap: adrouterThinkingLevels.flash },
+		{ id: "mimo-v2.5-pro", name: "AdRouter MiMo V2.5 Pro", thinkingLevelMap: adrouterThinkingLevels.flash },
+		{ id: "agnes-2.5-flash", name: "AdRouter Agnes 2.5 Flash", thinkingLevelMap: adrouterThinkingLevels.flash },
+		{ id: "agnes-2.5-pro-alpha", name: "AdRouter Agnes 2.5 Pro Alpha", thinkingLevelMap: adrouterThinkingLevels.pro },
 	]) {
 		allModels.push({
 			id: model.id,
@@ -2191,15 +2224,7 @@ async function generateModels() {
 			provider: "adrouter",
 			baseUrl: "",
 			reasoning: true,
-			thinkingLevelMap: {
-				off: "none",
-				minimal: null,
-				low: null,
-				medium: "medium",
-				high: "high",
-				xhigh: null,
-				max: null,
-			},
+			thinkingLevelMap: model.thinkingLevelMap,
 			input: ["text"],
 			cost: {
 				input: 0,

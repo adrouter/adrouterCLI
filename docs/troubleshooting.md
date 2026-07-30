@@ -7,7 +7,7 @@ For deployments, `installation.deployable` must be `true`. If doctor reports
 exact packaged version:
 
 ```sh
-npm install --global --ignore-scripts @adrouter/cli@0.81.0-beta.11
+npm install --global --ignore-scripts @adrouter/cli@0.81.0-beta.13
 ```
 
 Use `ADROUTER_BUNDLED_FEATURES=off` only as an explicit core-only recovery
@@ -18,8 +18,9 @@ mode; extension commands, tools, and skills are unavailable in that mode.
 - Network: verify DNS, TLS interception, proxy settings, and access to `api-staging.adrouter.co`.
 - Terminal: reproduce in a current terminal with `TERM` set correctly; include dimensions and OS, not terminal history.
 - Extensions: disable project resources, then bundled or user extensions one at a time.
-- Model selection: use only `deepseek-v4-flash` or `deepseek-v4-pro` for the hosted beta.
-- Context limits: both hosted models have a 131,072-token total window, with 126,976 input and 4,096
+- Model selection: use `deepseek-v4-flash`, `deepseek-v4-pro`, `mimo-v2.5`, `mimo-v2.5-pro`,
+  `agnes-2.5-flash`, or `agnes-2.5-pro-alpha` for the hosted beta.
+- Context limits: all six hosted models have a 131,072-token total window, with 126,976 input and 4,096
   output tokens. A growing session normally compacts automatically above about 114,688 estimated
   tokens. If one compact-and-retry still reports that the context is too large, run `/compact`, then
   reduce or split the largest message, pasted file, tool schema, or tool result. A single irreducible

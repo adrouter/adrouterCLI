@@ -6,9 +6,29 @@ import { pathToFileURL } from "node:url";
 import { join } from "node:path";
 
 const PRIVATE_PACKAGES = ["@adrouter/agent-core", "@adrouter/ai", "@adrouter/tui"];
+export const EXPECTED_ADROUTER_MODEL_IDS = [
+	"agnes-2.5-flash",
+	"agnes-2.5-pro-alpha",
+	"deepseek-v4-flash",
+	"deepseek-v4-pro",
+	"mimo-v2.5",
+	"mimo-v2.5-pro",
+];
 
 function assert(condition, message) {
 	if (!condition) throw new Error(message);
+}
+
+export function assertAdRouterOfflineModelList(output) {
+	const modelIds = output
+		.replaceAll(/\x1b\[[0-?]*[ -/]*[@-~]/g, "")
+		.split(/\r?\n/)
+		.map((line) => line.match(/^adrouter\s{2,}(\S+)\s{2,}/)?.[1])
+		.filter(Boolean);
+	assert(
+		JSON.stringify(modelIds) === JSON.stringify(EXPECTED_ADROUTER_MODEL_IDS),
+		`Offline AdRouter model list is ${JSON.stringify(modelIds)}, expected ${JSON.stringify(EXPECTED_ADROUTER_MODEL_IDS)}`,
+	);
 }
 
 function requiredFeatureSnapshot(resourceLoader) {
@@ -47,6 +67,16 @@ export async function verifyInstalledRuntime({ packageRoot, project, agentDir, e
 		pathToFileURL(
 			join(packageRoot, "node_modules", "@adrouter", "ai", "dist", "api", "adrouter-installation-auth.js"),
 		).href
+	);
+	const installedCatalog = await import(
+		pathToFileURL(
+			join(packageRoot, "node_modules", "@adrouter", "ai", "dist", "providers", "adrouter.models.js"),
+		).href
+	);
+	assert(
+		JSON.stringify(Object.keys(installedCatalog.ADROUTER_MODELS).sort()) ===
+			JSON.stringify(EXPECTED_ADROUTER_MODEL_IDS),
+		"Installed AdRouter catalog does not contain the exact expected model IDs",
 	);
 	const fixtureBody = new TextEncoder().encode(fixture.raw_body_utf8);
 	assert(installedAi.contentDigestSha256(fixtureBody) === fixture.content_digest, "Installed exact-body digest differs");

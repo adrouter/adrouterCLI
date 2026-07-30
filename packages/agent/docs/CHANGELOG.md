@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.81.0-beta.13] - 2026-07-30
+
+### Changed
+
+- Repacked the private agent runtime for the expanded AdRouter model catalog beta.
+
 ## [0.81.0-beta.12] - 2026-07-29
 
 ### Fixed

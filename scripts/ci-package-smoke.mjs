@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { verifyInstalledRuntime } from "./verify-installed-runtime.mjs";
+import { assertAdRouterOfflineModelList, verifyInstalledRuntime } from "./verify-installed-runtime.mjs";
 
 function run(command, args, options = {}) {
 	const result = spawnSync(command, args, {
@@ -53,6 +53,7 @@ try {
 			: join(install, "lib", "node_modules", "@adrouter", "cli");
 	const env = {
 		...process.env,
+		ADROUTER_API_KEY: "offline-catalog-fixture",
 		ADROUTER_API_URL: "http://127.0.0.1:1",
 		ADROUTER_CODING_AGENT_DIR: join(isolatedHome, ".adrouter", "agent"),
 		ADROUTER_PROFILES_DIR: join(isolatedHome, ".adrouter", "profiles"),
@@ -82,11 +83,12 @@ try {
 	if (doctor.installation?.kind !== "packaged" || doctor.installation?.deployable !== true) {
 		throw new Error(`Packaged doctor rejected the installation: ${JSON.stringify(doctor.installation)}`);
 	}
-	run(cli, ["--offline", "--no-approve", "--list-models", "adrouter"], {
+	const offlineModels = run(cli, ["--offline", "--no-approve", "--list-models", "adrouter"], {
 		capture: true,
 		cwd: project,
 		env,
 	});
+	assertAdRouterOfflineModelList(offlineModels);
 
 	run(profiles, ["set", "ci", "--provider", "adrouter", "--model", "deepseek-v4-flash"], { cwd: project, env });
 	if (!run(profiles, ["list"], { capture: true, cwd: project, env }).includes("ci")) {

@@ -2,7 +2,7 @@
 
 Start `adrouter` in the intended project. The first-project prompt controls whether repository-owned `.adrouter/` resources can load. Trust only reviewed workspaces.
 
-Run `/login adrouter`, type `CONNECT` only when you intend to create a new installation, and approve the matching user code in the opened WebUI page. The device code, private key, and credentials are never displayed. Then select `deepseek-v4-flash` or `deepseek-v4-pro`. For non-interactive work after enrollment:
+Run `/login adrouter`, type `CONNECT` only when you intend to create a new installation, and approve the matching user code in the opened WebUI page. The device code, private key, and credentials are never displayed. Then select `deepseek-v4-flash`, `deepseek-v4-pro`, `mimo-v2.5`, `mimo-v2.5-pro`, `agnes-2.5-flash`, or `agnes-2.5-pro-alpha`. For non-interactive work after enrollment:
 
 ```sh
 adrouter --provider adrouter --model deepseek-v4-flash --print "Explain this project"

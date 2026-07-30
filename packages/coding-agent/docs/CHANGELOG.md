@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.81.0-beta.13] - 2026-07-30
+
+### Added
+
+- Exposed the six-model AdRouter catalog in offline model listing and packaged-runtime verification.
+
 ## [0.81.0-beta.12] - 2026-07-29
 
 ### Fixed

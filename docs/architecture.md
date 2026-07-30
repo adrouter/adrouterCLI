@@ -18,7 +18,7 @@ Sponsorship selection and rendering stay outside model and tool context. The bac
 
 ## Hosted context admission
 
-The generated AdRouter catalog is the deterministic offline source for both hosted model limits:
+The generated AdRouter catalog is the deterministic offline source for all six hosted model limits:
 131,072 total tokens, 126,976 maximum input tokens, and 4,096 maximum output tokens. Before an
 official hosted request, the provider conservatively estimates the full serialized model context,
 including the system prompt, conversation, multibyte text, tool schemas, and tool results. The

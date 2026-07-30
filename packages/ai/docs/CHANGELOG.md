@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.81.0-beta.13] - 2026-07-30
+
+### Added
+
+- Added generated AdRouter catalog entries for MiMo V2.5 Flash/Pro and Agnes 2.5 Flash/Pro Alpha,
+  including their exact hosted thinking-level capabilities.
+
 ## [0.81.0-beta.12] - 2026-07-29
 
 ### Changed

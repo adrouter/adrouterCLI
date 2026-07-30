@@ -29,6 +29,26 @@ for (const path of markdown) {
 }
 
 const rootReadme = readFileSync("README.md", "utf8");
+const adrouterModelIds = [
+	"deepseek-v4-flash",
+	"deepseek-v4-pro",
+	"mimo-v2.5",
+	"mimo-v2.5-pro",
+	"agnes-2.5-flash",
+	"agnes-2.5-pro-alpha",
+];
+for (const path of [
+	"README.md",
+	"docs/installation.md",
+	"docs/usage.md",
+	"docs/troubleshooting.md",
+	"packages/coding-agent/bundled/adroutercli/skills/adroutercli/docs/SKILL.md",
+]) {
+	const text = readFileSync(path, "utf8");
+	for (const modelId of adrouterModelIds) {
+		if (!text.includes(modelId)) failures.push(`${path}: missing hosted AdRouter model ID ${modelId}`);
+	}
+}
 for (const command of [
 	"npm install --global --ignore-scripts @adrouter/cli@beta",
 	"adrouter --version",

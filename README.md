@@ -3,7 +3,7 @@
 # AdRouterCLI
 
 AdRouterCLI is a terminal coding agent that routes model requests through
-AdRouter. Version `0.81.0-beta.12` is an MIT-licensed public-source and npm
+AdRouter. Version `0.81.0-beta.13` is an MIT-licensed public-source and npm
 prerelease; hosted access remains invite-only. AdRouterCLI is derived from
 [Mario Zechner's upstream project](UPSTREAM.md), whose MIT license and
 attribution are preserved.
@@ -53,14 +53,18 @@ and is never valid release or deployment evidence.
 5. Run `/ads` to inspect sponsorship status or opt out immediately. Use `/logout
    adrouter` to attempt remote revocation and always remove local installation secrets.
 
-The hosted beta routes `deepseek-v4-flash` and `deepseek-v4-pro`:
+The hosted beta routes six models:
 
 ```sh
 adrouter --provider adrouter --model deepseek-v4-flash
 adrouter --provider adrouter --model deepseek-v4-pro
+adrouter --provider adrouter --model mimo-v2.5
+adrouter --provider adrouter --model mimo-v2.5-pro
+adrouter --provider adrouter --model agnes-2.5-flash
+adrouter --provider adrouter --model agnes-2.5-pro-alpha
 ```
 
-Both hosted models use a 131,072-token total context contract with at most 4,096 output tokens and
+All hosted models use a 131,072-token total context contract with at most 4,096 output tokens and
 126,976 input tokens. With default settings, AdRouterCLI estimates system, message, tool-schema, and
 tool-result context and compacts proactively above about 114,688 tokens. If the Router still returns
 the structured `input_limit_exceeded` error before any response event, the CLI compacts and retries
@@ -151,8 +155,8 @@ belong in GitHub Issues; usage questions belong in GitHub Discussions. See
 Inspect the immutable source tag before installation:
 
 ```sh
-gh api repos/adrouter/adrouterCLI/git/ref/tags/v0.81.0-beta.12
-gh api repos/adrouter/adrouterCLI/tarball/v0.81.0-beta.12 > adrouterCLI-v0.81.0-beta.12.tar.gz
+gh api repos/adrouter/adrouterCLI/git/ref/tags/v0.81.0-beta.13
+gh api repos/adrouter/adrouterCLI/tarball/v0.81.0-beta.13 > adrouterCLI-v0.81.0-beta.13.tar.gz
 ```
 
 The release draft includes the single bundled npm tarball, its artifact
