@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.81.0-beta.19] - 2026-08-03
+
+### Changed
+
+- Replaced the shared hosted limit scalars with an exact model-keyed contract generated from the
+  committed Router catalog, and made official request preflight/output caps selected-model-specific.
+- Preserved supplied context/output metadata for explicit custom and loopback AdRouter models while
+  keeping omitted hosted output under Router's 4,096-token default.
+
 ## [0.81.0-beta.18] - 2026-08-02
 
 ### Changed

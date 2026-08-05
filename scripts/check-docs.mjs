@@ -49,6 +49,23 @@ if (actualTable !== expectedTable) failures.push("docs/about.md: generated model
 if (!about.includes(`\`${catalog.catalog_digest}\``)) {
 	failures.push("docs/about.md: catalog digest differs from vendored catalog");
 }
+if (!about.includes("Router continues\nto use 4,096 tokens when output is omitted")) {
+	failures.push("docs/about.md: omitted-output and account default is not distinguished from model maxima");
+}
+for (const path of ["README.md", "docs/about.md", "docs/architecture.md", "docs/installation.md", "docs/troubleshooting.md"]) {
+	const text = readFileSync(path, "utf8");
+	for (const stale of [
+		"All hosted models use a 131,072-token total context contract",
+		"The 131,072-token context is divided into at most 126,976 input tokens and 4,096 output tokens",
+		"all eight hosted models have a 131,072-token total window",
+		"All eight use a 131,072-token total context",
+	]) {
+		if (text.includes(stale)) failures.push(`${path}: stale shared hosted-limit claim remains`);
+	}
+}
+if (!readFileSync("packages/ai/docs/README.md", "utf8").includes("ADROUTER_HOSTED_LIMITS_BY_MODEL")) {
+	failures.push("packages/ai/docs/README.md: model-keyed hosted limits export is undocumented");
+}
 for (const path of [
 	"docs/installation.md",
 	"docs/usage.md",

@@ -25,9 +25,10 @@ review remote installations in the WebUI if revocation could not be confirmed.
 
 The installed AdRouter model catalog is usable offline and contains `agnes-2.0-flash`,
 `agnes-2.5-flash`, `agnes-2.5-pro`, `agnes-2.5-pro-alpha`, `deepseek-v4-flash`,
-`deepseek-v4-pro`, `mimo-v2.5`, and `mimo-v2.5-pro`. All eight use a 131,072-token total context
-with a 4,096-token output cap.
-Hosted discovery may validate that contract but must not silently expand it and delay local compaction.
+`deepseek-v4-pro`, `mimo-v2.5`, and `mimo-v2.5-pro`. Their generated model-specific context, input,
+and output tuples are listed in the [product guide](about.md#official-model-catalog). Router keeps a
+4,096-token omitted-output and default account ceiling even though explicit model maxima are higher.
+Hosted discovery may validate that contract but must not silently alter it and delay local compaction.
 
 The doctor result must report `"installation":{"kind":"packaged","deployable":true}`
 for a supported deployment. A source-linked or incomplete installation can run

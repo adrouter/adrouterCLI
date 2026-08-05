@@ -87,15 +87,38 @@ describe("createAgentSession model registry boundary", () => {
 		process.env.ADROUTER_API_URL = "http://127.0.0.1:8787";
 		const registry = ModelRegistry.create(AuthStorage.inMemory());
 		const base = registry.getAll()[0]!;
-		const custom = { ...base, id: "router-private-model", name: "Router Private Model", maxTokens: 999999 };
+		const custom = {
+			...base,
+			id: "router-private-model",
+			name: "Router Private Model",
+			contextWindow: 222_222,
+			maxTokens: 999_999,
+		};
 		const { session } = await createAgentSession({ ...(await createOptions(registry)), model: custom });
 
 		expect(session.model).toMatchObject({
 			provider: "adrouter",
 			id: "router-private-model",
 			name: "Router Private Model",
-			contextWindow: base.contextWindow,
-			maxTokens: base.maxTokens,
+			contextWindow: 222_222,
+			maxTokens: 999_999,
+		});
+		session.dispose();
+	});
+
+	it("retains supplied limits for a canonical-looking model on a custom endpoint", async () => {
+		process.env.ADROUTER_API_URL = "http://127.0.0.1:8787";
+		const registry = ModelRegistry.create(AuthStorage.inMemory());
+		const canonical = registry.getAll()[0]!;
+		const { session } = await createAgentSession({
+			...(await createOptions(registry)),
+			model: { ...canonical, contextWindow: 333_333, maxTokens: 8_888 },
+		});
+
+		expect(session.model).toMatchObject({
+			id: canonical.id,
+			contextWindow: 333_333,
+			maxTokens: 8_888,
 		});
 		session.dispose();
 	});

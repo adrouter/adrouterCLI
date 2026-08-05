@@ -1,14 +1,21 @@
-import { ADROUTER_HOSTED_LIMITS } from "./providers/adrouter.models.ts";
+import { ADROUTER_HOSTED_LIMITS_BY_MODEL } from "./providers/adrouter.models.ts";
 
 export const ADROUTER_PROVIDER_ID = "adrouter";
 export const DEFAULT_ADROUTER_API_URL = "https://api-staging.adrouter.co";
 export const OFFICIAL_ADROUTER_API_ORIGINS = ["https://api-staging.adrouter.co", "https://api.adrouter.co"] as const;
-export const ADROUTER_HOSTED_CONTEXT_WINDOW_TOKENS = ADROUTER_HOSTED_LIMITS.contextWindowTokens;
-export const ADROUTER_HOSTED_MAX_INPUT_TOKENS = ADROUTER_HOSTED_LIMITS.maxInputTokens;
-export const ADROUTER_HOSTED_MAX_OUTPUT_TOKENS = ADROUTER_HOSTED_LIMITS.maxOutputTokens;
 export const ADROUTER_HOSTED_COMPACTION_RESERVE_TOKENS = 16_384;
-export const ADROUTER_HOSTED_PROACTIVE_INPUT_TOKENS =
-	ADROUTER_HOSTED_CONTEXT_WINDOW_TOKENS - ADROUTER_HOSTED_COMPACTION_RESERVE_TOKENS;
+
+export type AdRouterHostedModelId = keyof typeof ADROUTER_HOSTED_LIMITS_BY_MODEL;
+export type AdRouterHostedLimits = (typeof ADROUTER_HOSTED_LIMITS_BY_MODEL)[AdRouterHostedModelId];
+
+export function getAdRouterHostedLimits(modelId: string): AdRouterHostedLimits | undefined {
+	if (!Object.hasOwn(ADROUTER_HOSTED_LIMITS_BY_MODEL, modelId)) return undefined;
+	return ADROUTER_HOSTED_LIMITS_BY_MODEL[modelId as AdRouterHostedModelId];
+}
+
+export function getAdRouterHostedProactiveInputTokens(limits: AdRouterHostedLimits): number {
+	return Math.min(limits.maxInputTokens, limits.contextWindowTokens - ADROUTER_HOSTED_COMPACTION_RESERVE_TOKENS);
+}
 
 export interface AdRouterApiUrlSources {
 	environmentUrl?: string;

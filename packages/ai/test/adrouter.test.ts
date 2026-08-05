@@ -2,10 +2,9 @@ import { Type } from "typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readAdRouterCatalog } from "../scripts/adrouter-catalog.ts";
 import {
-	ADROUTER_HOSTED_CONTEXT_WINDOW_TOKENS,
-	ADROUTER_HOSTED_MAX_INPUT_TOKENS,
-	ADROUTER_HOSTED_MAX_OUTPUT_TOKENS,
-	ADROUTER_HOSTED_PROACTIVE_INPUT_TOKENS,
+	ADROUTER_HOSTED_COMPACTION_RESERVE_TOKENS,
+	getAdRouterHostedLimits,
+	getAdRouterHostedProactiveInputTokens,
 } from "../src/adrouter-config.ts";
 import { getAdRouterMessageUpdate, getLatestAdRouterAds } from "../src/adrouter-events.ts";
 import { assertAdRouterHostedInputWithinLimit, stream } from "../src/api/adrouter.ts";
@@ -14,7 +13,7 @@ import {
 	ADROUTER_CATALOG_DIGEST,
 	ADROUTER_CATALOG_METADATA,
 	ADROUTER_CATALOG_SCHEMA_VERSION,
-	ADROUTER_HOSTED_LIMITS,
+	ADROUTER_HOSTED_LIMITS_BY_MODEL,
 	ADROUTER_MODELS,
 } from "../src/providers/adrouter.models.ts";
 import type { Model } from "../src/types.ts";
@@ -25,16 +24,8 @@ function parseRequestBody(init: RequestInit | undefined): any {
 }
 
 const model: Model<"adrouter-agent"> = {
-	id: "deepseek-v4-flash",
-	name: "AdRouter DeepSeek V4 Flash",
-	api: "adrouter-agent",
-	provider: "adrouter",
+	...ADROUTER_MODELS["deepseek-v4-flash"],
 	baseUrl: "https://router.example.test",
-	reasoning: true,
-	input: ["text"],
-	cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-	contextWindow: ADROUTER_HOSTED_CONTEXT_WINDOW_TOKENS,
-	maxTokens: ADROUTER_HOSTED_MAX_OUTPUT_TOKENS,
 };
 
 function mockFetch(body: unknown): void {
@@ -74,51 +65,64 @@ describe("AdRouter provider", () => {
 		delete process.env.ADROUTER_MIN_AD_TIER;
 	});
 
-	it("keeps all hosted models on the shared 128K contract", () => {
-		for (const hostedModel of Object.values(ADROUTER_MODELS)) {
-			expect(hostedModel.contextWindow).toBe(ADROUTER_HOSTED_CONTEXT_WINDOW_TOKENS);
-			expect(hostedModel.maxTokens).toBe(ADROUTER_HOSTED_MAX_OUTPUT_TOKENS);
+	it("keeps exact model-specific hosted limits and compaction thresholds", () => {
+		const catalog = readAdRouterCatalog();
+		for (const descriptor of catalog.models) {
+			const limits = getAdRouterHostedLimits(descriptor.id);
+			expect(limits).toEqual({
+				contextWindowTokens: descriptor.context_window,
+				maxInputTokens: descriptor.max_input_tokens,
+				maxOutputTokens: descriptor.max_output_tokens,
+			});
+			expect(ADROUTER_MODELS[descriptor.id]).toMatchObject({
+				contextWindow: descriptor.context_window,
+				maxTokens: descriptor.max_output_tokens,
+			});
+			expect(getAdRouterHostedProactiveInputTokens(limits!)).toBe(
+				Math.min(
+					descriptor.max_input_tokens,
+					descriptor.context_window - ADROUTER_HOSTED_COMPACTION_RESERVE_TOKENS,
+				),
+			);
 		}
-		expect(ADROUTER_HOSTED_MAX_INPUT_TOKENS).toBe(
-			ADROUTER_HOSTED_CONTEXT_WINDOW_TOKENS - ADROUTER_HOSTED_MAX_OUTPUT_TOKENS,
-		);
-		expect(ADROUTER_HOSTED_PROACTIVE_INPUT_TOKENS).toBe(114_688);
 	});
 
-	it("allows the exact proactive threshold and rejects one estimated token above it locally", () => {
-		const atThreshold = {
-			messages: [
-				{
-					role: "user" as const,
-					content: "a".repeat(ADROUTER_HOSTED_PROACTIVE_INPUT_TOKENS * 4),
-					timestamp: Date.now(),
-				},
-			],
-		};
-		expect(assertAdRouterHostedInputWithinLimit(atThreshold)).toBe(ADROUTER_HOSTED_PROACTIVE_INPUT_TOKENS);
-
-		let error: unknown;
-		try {
-			assertAdRouterHostedInputWithinLimit({
-				...atThreshold,
+	it("allows each exact proactive threshold and rejects one estimated token above it locally", () => {
+		for (const descriptor of readAdRouterCatalog().models) {
+			const limits = getAdRouterHostedLimits(descriptor.id)!;
+			const proactiveInputTokens = getAdRouterHostedProactiveInputTokens(limits);
+			const atThreshold = {
 				messages: [
 					{
-						...atThreshold.messages[0],
-						content: `${atThreshold.messages[0].content}aaaa`,
+						role: "user" as const,
+						content: "a".repeat(proactiveInputTokens * 4),
+						timestamp: Date.now(),
 					},
 				],
+			};
+			expect(assertAdRouterHostedInputWithinLimit(descriptor.id, atThreshold)).toBe(proactiveInputTokens);
+
+			let error: unknown;
+			try {
+				assertAdRouterHostedInputWithinLimit(descriptor.id, {
+					...atThreshold,
+					messages: [{ ...atThreshold.messages[0], content: `${atThreshold.messages[0].content}aaaa` }],
+				});
+			} catch (candidate) {
+				error = candidate;
+			}
+			expect(error).toMatchObject({
+				code: "input_limit_exceeded",
+				details: {
+					estimated_input_tokens: proactiveInputTokens + 1,
+					proactive_input_tokens: proactiveInputTokens,
+					context_window_tokens: descriptor.context_window,
+					max_input_tokens: descriptor.max_input_tokens,
+					max_output_tokens: descriptor.max_output_tokens,
+					local_preflight: 1,
+				},
 			});
-		} catch (candidate) {
-			error = candidate;
 		}
-		expect(error).toMatchObject({
-			code: "input_limit_exceeded",
-			details: {
-				estimated_input_tokens: ADROUTER_HOSTED_PROACTIVE_INPUT_TOKENS + 1,
-				max_input_tokens: ADROUTER_HOSTED_MAX_INPUT_TOKENS,
-				local_preflight: 1,
-			},
-		});
 	});
 
 	it("accounts conservatively for the current tool schema when prior usage is available", () => {
@@ -129,18 +133,18 @@ describe("AdRouter provider", () => {
 			provider: "adrouter" as const,
 			model: "deepseek-v4-flash",
 			usage: {
-				input: 110_000,
+				input: getAdRouterHostedProactiveInputTokens(getAdRouterHostedLimits("deepseek-v4-flash")!) - 5_000,
 				output: 0,
 				cacheRead: 0,
 				cacheWrite: 0,
-				totalTokens: 110_000,
+				totalTokens: getAdRouterHostedProactiveInputTokens(getAdRouterHostedLimits("deepseek-v4-flash")!) - 5_000,
 				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
 			},
 			stopReason: "stop" as const,
 			timestamp: Date.now(),
 		};
 		expect(() =>
-			assertAdRouterHostedInputWithinLimit({
+			assertAdRouterHostedInputWithinLimit("deepseek-v4-flash", {
 				messages: [priorAssistant],
 				tools: [
 					{
@@ -467,11 +471,18 @@ describe("AdRouter provider", () => {
 		expect(Object.values(ADROUTER_MODELS).map(({ name }) => name)).toEqual(
 			catalog.models.map(({ display_name }) => `AdRouter ${display_name}`),
 		);
-		expect(ADROUTER_HOSTED_LIMITS).toEqual({
-			contextWindowTokens: 131_072,
-			maxInputTokens: 126_976,
-			maxOutputTokens: 4_096,
-		});
+		expect(ADROUTER_HOSTED_LIMITS_BY_MODEL).toEqual(
+			Object.fromEntries(
+				catalog.models.map((descriptor) => [
+					descriptor.id,
+					{
+						contextWindowTokens: descriptor.context_window,
+						maxInputTokens: descriptor.max_input_tokens,
+						maxOutputTokens: descriptor.max_output_tokens,
+					},
+				]),
+			),
+		);
 		for (const descriptor of catalog.models) {
 			const hostedModel = ADROUTER_MODELS[descriptor.id];
 			expect(hostedModel).toMatchObject({
@@ -481,8 +492,8 @@ describe("AdRouter provider", () => {
 				reasoning: true,
 				input: ["text"],
 				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: ADROUTER_HOSTED_CONTEXT_WINDOW_TOKENS,
-				maxTokens: ADROUTER_HOSTED_MAX_OUTPUT_TOKENS,
+				contextWindow: descriptor.context_window,
+				maxTokens: descriptor.max_output_tokens,
 			});
 			expect(ADROUTER_CATALOG_METADATA[descriptor.id]).toEqual({
 				provider: descriptor.provider,
@@ -490,7 +501,9 @@ describe("AdRouter provider", () => {
 				description: descriptor.description,
 				thinkingLevels: descriptor.thinking_levels,
 				defaultThinkingLevel: descriptor.default_thinking_level,
+				contextWindowTokens: descriptor.context_window,
 				maxInputTokens: descriptor.max_input_tokens,
+				maxOutputTokens: descriptor.max_output_tokens,
 			});
 		}
 
@@ -707,18 +720,96 @@ describe("AdRouter provider", () => {
 			rememberNonce: vi.fn(),
 		};
 
-		await stream(hostedModel, { messages: [] }, { adrouterAuth, apiKey: "ignored", maxTokens: 9000 }).result();
+		await stream(hostedModel, { messages: [] }, { adrouterAuth, apiKey: "ignored", maxTokens: 90_000 }).result();
 
 		const request = fetchMock.mock.calls[0]?.[1];
 		const body = parseRequestBody(request);
 		expect(body.runtime_mode).toBeUndefined();
 		expect(body.tier_override).toBeUndefined();
-		expect(body.max_output_tokens).toBe(4096);
+		expect(body.max_output_tokens).toBe(65_536);
 		expect(body.metadata.ad_mode).toBe("live");
 		const headers = new Headers(request?.headers);
 		expect(headers.get("authorization")).toBe("DPoP access-token");
 		expect(headers.get("dpop")).toBe("signed-proof");
 		expect(headers.get("content-digest")).toMatch(/^sha-256=:/);
+	});
+
+	it("uses each selected hosted model output cap and leaves omitted output absent", async () => {
+		const fetchMock = vi.fn(
+			async (_input: unknown, _init?: RequestInit) =>
+				new Response(JSON.stringify({ assistant: { content: "Hosted." }, ads: [] }), {
+					status: 200,
+					headers: { "content-type": "application/json" },
+				}),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+		const adrouterAuth = {
+			canAuthenticate: () => true,
+			getAccess: async () => ({
+				accessToken: "access-token",
+				expiresAt: Date.now() + 60_000,
+				installationId: "installation-1",
+				clientKind: "cli" as const,
+				clientVersion: "0.81.0-beta.18",
+			}),
+			signProof: async () => ({ proof: "signed-proof", contentDigest: "sha-256=:fixture=:" }),
+			rememberNonce: vi.fn(),
+		};
+
+		for (const descriptor of readAdRouterCatalog().models) {
+			const hostedModel = { ...ADROUTER_MODELS[descriptor.id], baseUrl: "https://api-staging.adrouter.co" };
+			for (const requested of [
+				descriptor.max_output_tokens - 1,
+				descriptor.max_output_tokens,
+				descriptor.max_output_tokens + 1,
+			]) {
+				fetchMock.mockClear();
+				await stream(hostedModel, { messages: [] }, { adrouterAuth, maxTokens: requested }).result();
+				const body = parseRequestBody(fetchMock.mock.calls[0]?.[1]);
+				expect(body.max_output_tokens).toBe(Math.min(requested, descriptor.max_output_tokens));
+			}
+			fetchMock.mockClear();
+			await stream(hostedModel, { messages: [] }, { adrouterAuth }).result();
+			expect(parseRequestBody(fetchMock.mock.calls[0]?.[1]).max_output_tokens).toBeUndefined();
+		}
+	});
+
+	it("rejects an unknown official model locally without borrowing another tuple", async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+		const message = await stream(
+			{ ...model, id: "unknown-official", baseUrl: "https://api-staging.adrouter.co" },
+			{ messages: [] },
+			{},
+		).result();
+
+		expect(message).toMatchObject({ stopReason: "error", errorCode: "unknown_model" });
+		expect(message.errorMessage).toContain("unknown-official");
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+
+	it("uses supplied output metadata for custom and loopback models", async () => {
+		const fetchMock = vi.fn(
+			async (_input: unknown, _init?: RequestInit) =>
+				new Response(JSON.stringify({ assistant: { content: "Custom." }, ads: [] }), {
+					status: 200,
+					headers: { "content-type": "application/json" },
+				}),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+		const customModel = {
+			...model,
+			id: "deepseek-v4-flash",
+			baseUrl: "http://127.0.0.1:8787",
+			contextWindow: 222_222,
+			maxTokens: 777,
+		};
+
+		await stream(customModel, { messages: [] }, { apiKey: "test-key", maxTokens: 900 }).result();
+		expect(parseRequestBody(fetchMock.mock.calls[0]?.[1]).max_output_tokens).toBe(777);
+		fetchMock.mockClear();
+		await stream(customModel, { messages: [] }, { apiKey: "test-key" }).result();
+		expect(parseRequestBody(fetchMock.mock.calls[0]?.[1]).max_output_tokens).toBeUndefined();
 	});
 
 	it("filters protected headers and retries one nonce challenge before consuming the response", async () => {

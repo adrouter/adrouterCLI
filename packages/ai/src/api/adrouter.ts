@@ -1,10 +1,9 @@
 import {
-	ADROUTER_HOSTED_CONTEXT_WINDOW_TOKENS,
-	ADROUTER_HOSTED_MAX_INPUT_TOKENS,
-	ADROUTER_HOSTED_MAX_OUTPUT_TOKENS,
-	ADROUTER_HOSTED_PROACTIVE_INPUT_TOKENS,
 	AdRouterApiError,
+	type AdRouterHostedLimits,
 	adRouterApiErrorFromResponse,
+	getAdRouterHostedLimits,
+	getAdRouterHostedProactiveInputTokens,
 	isOfficialAdRouterApiUrl,
 	resolveAdRouterAdMode,
 	resolveAdRouterApiUrl,
@@ -116,7 +115,20 @@ function sanitizeNumericErrorDetails(value: unknown): Record<string, number> {
 	return details;
 }
 
-export function assertAdRouterHostedInputWithinLimit(context: Context): number {
+function requireAdRouterHostedLimits(modelId: string): AdRouterHostedLimits {
+	const limits = getAdRouterHostedLimits(modelId);
+	if (limits) return limits;
+	throw new AdRouterApiError(
+		`Unknown official hosted AdRouter model: ${sanitizeTerminalText(modelId).slice(0, 160)}`,
+		{
+			code: "unknown_model",
+		},
+	);
+}
+
+export function assertAdRouterHostedInputWithinLimit(modelId: string, context: Context): number {
+	const limits = requireAdRouterHostedLimits(modelId);
+	const proactiveInputTokens = getAdRouterHostedProactiveInputTokens(limits);
 	const estimate = estimateContextTokens(context);
 	let estimatedInputTokens = estimate.tokens;
 	// Reported usage describes the prior request prefix. Count the current prefix again when
@@ -126,7 +138,7 @@ export function assertAdRouterHostedInputWithinLimit(context: Context): number {
 		if (context.systemPrompt) estimatedInputTokens += estimateTextTokens(context.systemPrompt);
 		if (context.tools?.length) estimatedInputTokens += estimateTextTokens(JSON.stringify(context.tools));
 	}
-	if (estimatedInputTokens <= ADROUTER_HOSTED_PROACTIVE_INPUT_TOKENS) return estimatedInputTokens;
+	if (estimatedInputTokens <= proactiveInputTokens) return estimatedInputTokens;
 
 	throw new AdRouterApiError(
 		"AdRouter context exceeds the proactive compaction threshold. " +
@@ -135,9 +147,10 @@ export function assertAdRouterHostedInputWithinLimit(context: Context): number {
 			code: "input_limit_exceeded",
 			details: {
 				estimated_input_tokens: estimatedInputTokens,
-				proactive_input_tokens: ADROUTER_HOSTED_PROACTIVE_INPUT_TOKENS,
-				max_input_tokens: ADROUTER_HOSTED_MAX_INPUT_TOKENS,
-				context_window_tokens: ADROUTER_HOSTED_CONTEXT_WINDOW_TOKENS,
+				proactive_input_tokens: proactiveInputTokens,
+				max_input_tokens: limits.maxInputTokens,
+				max_output_tokens: limits.maxOutputTokens,
+				context_window_tokens: limits.contextWindowTokens,
 				local_preflight: 1,
 			},
 		},
@@ -626,7 +639,15 @@ function buildRouterBody(
 		body.runtime_mode = runtimeMode;
 	}
 	if (options?.maxTokens !== undefined && Number.isFinite(options.maxTokens) && options.maxTokens > 0) {
-		body.max_output_tokens = Math.min(Math.floor(options.maxTokens), ADROUTER_HOSTED_MAX_OUTPUT_TOKENS);
+		const maxOutputTokens = officialHosted
+			? requireAdRouterHostedLimits(routerModel).maxOutputTokens
+			: model.maxTokens;
+		if (!Number.isFinite(maxOutputTokens) || maxOutputTokens <= 0) {
+			throw new AdRouterApiError("The selected custom AdRouter model has an invalid output limit.", {
+				code: "invalid_model_limits",
+			});
+		}
+		body.max_output_tokens = Math.min(Math.floor(options.maxTokens), Math.floor(maxOutputTokens));
 	}
 	return body;
 }
@@ -643,7 +664,7 @@ async function fetchRouter(
 	const adMode = resolveAdRouterAdMode(baseUrl, options?.env?.ADROUTER_AD_MODE ?? process.env.ADROUTER_AD_MODE);
 	const url = `${baseUrl}/v1/agent/turn`;
 	const officialHosted = isOfficialAdRouterApiUrl(baseUrl);
-	if (officialHosted) assertAdRouterHostedInputWithinLimit(context);
+	if (officialHosted) assertAdRouterHostedInputWithinLimit(resolveRouterModel(model), context);
 	const body = new TextEncoder().encode(JSON.stringify(buildRouterBody(model, context, baseUrl, adMode, options)));
 	const callerHeaders = new Headers();
 	const protectedHeaders = new Set([

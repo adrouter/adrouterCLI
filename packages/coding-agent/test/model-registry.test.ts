@@ -60,6 +60,16 @@ describe("locked official model registry", () => {
 		expect(models.map(({ provider }) => provider)).toEqual(Array(8).fill("adrouter"));
 		expect(models.map(({ id }) => id)).toEqual(expectedIds);
 		expect(models).toEqual(Object.values(ADROUTER_MODELS));
+		expect(models.map(({ id, contextWindow, maxTokens }) => ({ id, contextWindow, maxTokens }))).toEqual([
+			{ id: "deepseek-v4-flash", contextWindow: 1_048_576, maxTokens: 65_536 },
+			{ id: "deepseek-v4-pro", contextWindow: 1_048_576, maxTokens: 131_072 },
+			{ id: "mimo-v2.5", contextWindow: 1_048_576, maxTokens: 65_536 },
+			{ id: "mimo-v2.5-pro", contextWindow: 1_048_576, maxTokens: 131_072 },
+			{ id: "agnes-2.0-flash", contextWindow: 524_288, maxTokens: 65_536 },
+			{ id: "agnes-2.5-flash", contextWindow: 524_288, maxTokens: 65_536 },
+			{ id: "agnes-2.5-pro", contextWindow: 1_048_576, maxTokens: 131_072 },
+			{ id: "agnes-2.5-pro-alpha", contextWindow: 1_048_576, maxTokens: 196_608 },
+		]);
 
 		models.splice(0);
 		expect(registry.getAll().map(({ id }) => id)).toEqual(expectedIds);

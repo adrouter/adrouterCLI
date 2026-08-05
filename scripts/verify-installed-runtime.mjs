@@ -16,21 +16,53 @@ export const EXPECTED_ADROUTER_MODEL_IDS = [
 	"agnes-2.5-pro",
 	"agnes-2.5-pro-alpha",
 ];
+export const EXPECTED_ADROUTER_LIMITS = {
+	"deepseek-v4-flash": { contextWindowTokens: 1_048_576, maxInputTokens: 917_504, maxOutputTokens: 65_536 },
+	"deepseek-v4-pro": { contextWindowTokens: 1_048_576, maxInputTokens: 851_968, maxOutputTokens: 131_072 },
+	"mimo-v2.5": { contextWindowTokens: 1_048_576, maxInputTokens: 917_504, maxOutputTokens: 65_536 },
+	"mimo-v2.5-pro": { contextWindowTokens: 1_048_576, maxInputTokens: 851_968, maxOutputTokens: 131_072 },
+	"agnes-2.0-flash": { contextWindowTokens: 524_288, maxInputTokens: 458_752, maxOutputTokens: 65_536 },
+	"agnes-2.5-flash": { contextWindowTokens: 524_288, maxInputTokens: 458_752, maxOutputTokens: 65_536 },
+	"agnes-2.5-pro": { contextWindowTokens: 1_048_576, maxInputTokens: 851_968, maxOutputTokens: 131_072 },
+	"agnes-2.5-pro-alpha": { contextWindowTokens: 1_048_576, maxInputTokens: 786_432, maxOutputTokens: 196_608 },
+};
 
 function assert(condition, message) {
 	if (!condition) throw new Error(message);
 }
 
 export function assertAdRouterOfflineModelList(output) {
-	const modelIds = output
+	const rows = output
 		.replaceAll(/\x1b\[[0-?]*[ -/]*[@-~]/g, "")
 		.split(/\r?\n/)
-		.map((line) => line.match(/^adrouter\s{2,}(\S+)\s{2,}/)?.[1])
+		.map((line) => line.trim().split(/\s{2,}/))
+		.filter((columns) => columns[0] === "adrouter");
+	const modelIds = rows
+		.map((columns) => columns[1])
 		.filter(Boolean);
 	assert(
 		JSON.stringify(modelIds) === JSON.stringify(EXPECTED_ADROUTER_MODEL_IDS),
 		`Offline AdRouter model list is ${JSON.stringify(modelIds)}, expected ${JSON.stringify(EXPECTED_ADROUTER_MODEL_IDS)}`,
 	);
+	const expectedDisplay = Object.fromEntries(
+		Object.entries(EXPECTED_ADROUTER_LIMITS).map(([id, limits]) => [
+			id,
+			{
+				context: limits.contextWindowTokens === 1_048_576 ? "1.0M" : "524.3K",
+				maxOutput:
+					limits.maxOutputTokens === 65_536
+						? "65.5K"
+						: limits.maxOutputTokens === 131_072
+							? "131.1K"
+							: "196.6K",
+			},
+		]),
+	);
+	for (const columns of rows) {
+		const expected = expectedDisplay[columns[1]];
+		assert(columns[2] === expected.context, `Offline ${columns[1]} context is ${columns[2]}, expected ${expected.context}`);
+		assert(columns[3] === expected.maxOutput, `Offline ${columns[1]} max output is ${columns[3]}, expected ${expected.maxOutput}`);
+	}
 }
 
 function requiredFeatureSnapshot(resourceLoader) {
@@ -75,10 +107,21 @@ export async function verifyInstalledRuntime({ packageRoot, project, agentDir, e
 			join(packageRoot, "node_modules", "@adrouter", "ai", "dist", "providers", "adrouter.models.js"),
 		).href
 	);
+	const installedAiRoot = await import(
+		pathToFileURL(join(packageRoot, "node_modules", "@adrouter", "ai", "dist", "index.js")).href
+	);
 	assert(
 		JSON.stringify(Object.keys(installedCatalog.ADROUTER_MODELS)) ===
 			JSON.stringify(EXPECTED_ADROUTER_MODEL_IDS),
 		"Installed AdRouter catalog does not contain the exact expected model IDs",
+	);
+	assert(
+		JSON.stringify(installedCatalog.ADROUTER_HOSTED_LIMITS_BY_MODEL) === JSON.stringify(EXPECTED_ADROUTER_LIMITS),
+		"Installed AdRouter model limits differ from the Router-derived tuples",
+	);
+	assert(
+		installedAiRoot.ADROUTER_HOSTED_LIMITS_BY_MODEL === installedCatalog.ADROUTER_HOSTED_LIMITS_BY_MODEL,
+		"Installed @adrouter/ai root does not export the model-keyed hosted limits",
 	);
 	const fixtureBody = new TextEncoder().encode(fixture.raw_body_utf8);
 	assert(installedAi.contentDigestSha256(fixtureBody) === fixture.content_digest, "Installed exact-body digest differs");
@@ -161,27 +204,16 @@ export async function verifyInstalledRuntime({ packageRoot, project, agentDir, e
 		pathToFileURL(join(packageRoot, "node_modules", "@adrouter", "ai", "dist", "api", "adrouter.js")).href
 	);
 	const originalFetch = globalThis.fetch;
-	let turnRequest;
+	const turnRequests = [];
 	try {
 		globalThis.fetch = async (input, init) => {
-			turnRequest = { input: String(input), init };
+			turnRequests.push({ input: String(input), init });
 			return new Response(JSON.stringify({ assistant: { content: "installed transport ok" }, ads: [] }), {
 				status: 200,
 				headers: { "content-type": "application/json" },
 			});
 		};
-		const model = {
-			id: "deepseek-v4-flash",
-			name: "Installed AdRouter verifier",
-			api: "adrouter",
-			provider: "adrouter",
-			baseUrl: origin,
-			reasoning: false,
-			input: ["text"],
-			cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-			contextWindow: 128000,
-			maxTokens: 4096,
-		};
+		const model = { ...installedCatalog.ADROUTER_MODELS["deepseek-v4-flash"], baseUrl: origin };
 		await installedTransport
 			.stream(model, { messages: [] }, {
 				adrouterAuth: installedManager,
@@ -195,10 +227,18 @@ export async function verifyInstalledRuntime({ packageRoot, project, agentDir, e
 				},
 			})
 			.result();
+		await installedTransport
+			.stream(model, { messages: [] }, { adrouterAuth: installedManager, maxTokens: 100_000 })
+			.result();
 	} finally {
 		globalThis.fetch = originalFetch;
 	}
-	const turnHeaders = new Headers(turnRequest.init.headers);
+	assert(turnRequests.length === 2, "Installed transport did not issue both omitted and explicit output requests");
+	const omittedBody = JSON.parse(new TextDecoder().decode(turnRequests[0].init.body));
+	const explicitBody = JSON.parse(new TextDecoder().decode(turnRequests[1].init.body));
+	assert(omittedBody.max_output_tokens === undefined, "Installed transport did not preserve Router's omitted-output default");
+	assert(explicitBody.max_output_tokens === 65_536, "Installed transport did not clamp explicit output by selected model");
+	const turnHeaders = new Headers(turnRequests[0].init.headers);
 	assert(turnHeaders.get("authorization") === "DPoP adr_at_installed_fixture", "Turn auth header was replaceable");
 	assert(turnHeaders.get("dpop") !== "attacker-proof", "Turn proof header was replaceable");
 	assert(turnHeaders.get("content-digest") !== "attacker-digest", "Turn digest header was replaceable");

@@ -3,6 +3,8 @@ import {
 	AdRouterApiError,
 	adRouterApiErrorFromResponse,
 	DEFAULT_ADROUTER_API_URL,
+	getAdRouterHostedLimits,
+	getAdRouterHostedProactiveInputTokens,
 	isOfficialAdRouterApiUrl,
 	resolveAdRouterAdMode,
 	resolveAdRouterApiUrl,
@@ -32,6 +34,21 @@ describe("AdRouter hosted configuration", () => {
 		expect(resolveAdRouterAdMode(DEFAULT_ADROUTER_API_URL)).toBe("live");
 		expect(resolveAdRouterAdMode("http://localhost:8787")).toBe("mock");
 		expect(resolveAdRouterAdMode(DEFAULT_ADROUTER_API_URL, "off")).toBe("off");
+	});
+
+	it("resolves exact hosted limits without a fallback tuple", () => {
+		expect(getAdRouterHostedLimits("agnes-2.0-flash")).toEqual({
+			contextWindowTokens: 524_288,
+			maxInputTokens: 458_752,
+			maxOutputTokens: 65_536,
+		});
+		expect(getAdRouterHostedLimits("agnes-2.5-pro-alpha")).toEqual({
+			contextWindowTokens: 1_048_576,
+			maxInputTokens: 786_432,
+			maxOutputTokens: 196_608,
+		});
+		expect(getAdRouterHostedLimits("unknown-model")).toBeUndefined();
+		expect(getAdRouterHostedProactiveInputTokens(getAdRouterHostedLimits("agnes-2.0-flash")!)).toBe(458_752);
 	});
 
 	it("validates a key through the authenticated profile endpoint", async () => {

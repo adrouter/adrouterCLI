@@ -10,6 +10,10 @@ adrouter --provider adrouter --model deepseek-v4-flash --print "Explain this pro
 
 Use `/ads` to view sponsorship status or opt out immediately. Sponsor payloads are display-only. Commands proposed by the agent remain subject to user approval.
 
+The [generated model table](about.md#official-model-catalog) lists the exact context, maximum input,
+and maximum output tuple for each hosted model. Omitting an output limit keeps Router's 4,096-token
+default; selecting a model with a larger maximum does not bypass account policy.
+
 `/logout adrouter` attempts signed remote revocation and removes the local installation even when offline; when remote confirmation is unavailable, review installations in the WebUI. `adrouter-profile` creates and selects isolated profiles. Sessions, file-protected credentials, trust decisions, extensions, and settings live under `~/.adrouter/agent`; project resources live under `.adrouter/`.
 
 Bundled features include web access, subagents, and the BTW side panel. To diagnose startup or extension behavior, disable bundled features individually in settings or start with project resources untrusted. Re-enable them one at a time after the fault is isolated.

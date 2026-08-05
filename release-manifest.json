@@ -1,15 +1,15 @@
 {
   "schema": 2,
-  "version": "0.81.0-beta.18",
+  "version": "0.81.0-beta.19",
   "node": ">=22.19.0",
   "release": {
     "candidateTag": "candidate",
     "finalTags": {
-      "beta": "0.81.0-beta.18",
-      "latest": "0.81.0-beta.18"
+      "beta": "0.81.0-beta.19",
+      "latest": "0.81.0-beta.19"
     },
     "githubPrerelease": true,
-    "supersedes": "0.81.0-beta.17"
+    "supersedes": "0.81.0-beta.18"
   },
   "npm": {
     "package": "@adrouter/cli",

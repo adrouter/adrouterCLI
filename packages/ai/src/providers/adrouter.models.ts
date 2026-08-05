@@ -4,11 +4,48 @@
 import type { Model } from "../types.ts";
 
 export const ADROUTER_CATALOG_SCHEMA_VERSION = 1 as const;
-export const ADROUTER_CATALOG_DIGEST = "sha256:e8e5f875b6c901ed98c3b07b5ad9aa107a52562dc9157aa8eae99b73562ca9be" as const;
-export const ADROUTER_HOSTED_LIMITS = {
-	contextWindowTokens: 131072,
-	maxInputTokens: 126976,
-	maxOutputTokens: 4096,
+export const ADROUTER_CATALOG_DIGEST = "sha256:75b5c38f6f037ac2d5105b0e780bf449d00e0c851dcb749232503c3782b32b70" as const;
+export const ADROUTER_HOSTED_LIMITS_BY_MODEL = {
+	"deepseek-v4-flash": {
+		contextWindowTokens: 1048576,
+		maxInputTokens: 917504,
+		maxOutputTokens: 65536,
+	},
+	"deepseek-v4-pro": {
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
+	},
+	"mimo-v2.5": {
+		contextWindowTokens: 1048576,
+		maxInputTokens: 917504,
+		maxOutputTokens: 65536,
+	},
+	"mimo-v2.5-pro": {
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
+	},
+	"agnes-2.0-flash": {
+		contextWindowTokens: 524288,
+		maxInputTokens: 458752,
+		maxOutputTokens: 65536,
+	},
+	"agnes-2.5-flash": {
+		contextWindowTokens: 524288,
+		maxInputTokens: 458752,
+		maxOutputTokens: 65536,
+	},
+	"agnes-2.5-pro": {
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
+	},
+	"agnes-2.5-pro-alpha": {
+		contextWindowTokens: 1048576,
+		maxInputTokens: 786432,
+		maxOutputTokens: 196608,
+	},
 } as const;
 
 export const ADROUTER_CATALOG_METADATA = {
@@ -18,7 +55,9 @@ export const ADROUTER_CATALOG_METADATA = {
 		description: "Fast DeepSeek coding model for interactive development.",
 		thinkingLevels: ["none","medium","high"],
 		defaultThinkingLevel: "medium",
-		maxInputTokens: 126976,
+		contextWindowTokens: 1048576,
+		maxInputTokens: 917504,
+		maxOutputTokens: 65536,
 	},
 	"deepseek-v4-pro": {
 		provider: "deepseek",
@@ -26,7 +65,9 @@ export const ADROUTER_CATALOG_METADATA = {
 		description: "DeepSeek coding model for complex development tasks.",
 		thinkingLevels: ["none","medium","high"],
 		defaultThinkingLevel: "medium",
-		maxInputTokens: 126976,
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
 	},
 	"mimo-v2.5": {
 		provider: "mimo",
@@ -34,7 +75,9 @@ export const ADROUTER_CATALOG_METADATA = {
 		description: "Fast MiMo coding model for interactive development.",
 		thinkingLevels: ["none","high"],
 		defaultThinkingLevel: "high",
-		maxInputTokens: 126976,
+		contextWindowTokens: 1048576,
+		maxInputTokens: 917504,
+		maxOutputTokens: 65536,
 	},
 	"mimo-v2.5-pro": {
 		provider: "mimo",
@@ -42,7 +85,9 @@ export const ADROUTER_CATALOG_METADATA = {
 		description: "MiMo coding model for complex development tasks.",
 		thinkingLevels: ["none","high"],
 		defaultThinkingLevel: "high",
-		maxInputTokens: 126976,
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
 	},
 	"agnes-2.0-flash": {
 		provider: "agnes",
@@ -50,7 +95,9 @@ export const ADROUTER_CATALOG_METADATA = {
 		description: "Fast Agnes 2.0 coding model for interactive development.",
 		thinkingLevels: ["none","high"],
 		defaultThinkingLevel: "none",
-		maxInputTokens: 126976,
+		contextWindowTokens: 524288,
+		maxInputTokens: 458752,
+		maxOutputTokens: 65536,
 	},
 	"agnes-2.5-flash": {
 		provider: "agnes",
@@ -58,7 +105,9 @@ export const ADROUTER_CATALOG_METADATA = {
 		description: "Fast Agnes 2.5 coding model for interactive development.",
 		thinkingLevels: ["none","high"],
 		defaultThinkingLevel: "none",
-		maxInputTokens: 126976,
+		contextWindowTokens: 524288,
+		maxInputTokens: 458752,
+		maxOutputTokens: 65536,
 	},
 	"agnes-2.5-pro": {
 		provider: "agnes",
@@ -66,7 +115,9 @@ export const ADROUTER_CATALOG_METADATA = {
 		description: "Agnes 2.5 reasoning model for complex development tasks.",
 		thinkingLevels: ["high"],
 		defaultThinkingLevel: "high",
-		maxInputTokens: 126976,
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
 	},
 	"agnes-2.5-pro-alpha": {
 		provider: "agnes",
@@ -74,7 +125,9 @@ export const ADROUTER_CATALOG_METADATA = {
 		description: "Alpha Agnes 2.5 reasoning model for complex development tasks.",
 		thinkingLevels: ["high"],
 		defaultThinkingLevel: "high",
-		maxInputTokens: 126976,
+		contextWindowTokens: 1048576,
+		maxInputTokens: 786432,
+		maxOutputTokens: 196608,
 	},
 } as const;
 
@@ -94,8 +147,8 @@ export const ADROUTER_MODELS = {
 			cacheRead: 0,
 			cacheWrite: 0,
 		},
-		contextWindow: 131072,
-		maxTokens: 4096,
+		contextWindow: 1048576,
+		maxTokens: 65536,
 	} satisfies Model<"adrouter-agent">,
 	"deepseek-v4-pro": {
 		id: "deepseek-v4-pro",
@@ -112,8 +165,8 @@ export const ADROUTER_MODELS = {
 			cacheRead: 0,
 			cacheWrite: 0,
 		},
-		contextWindow: 131072,
-		maxTokens: 4096,
+		contextWindow: 1048576,
+		maxTokens: 131072,
 	} satisfies Model<"adrouter-agent">,
 	"mimo-v2.5": {
 		id: "mimo-v2.5",
@@ -130,8 +183,8 @@ export const ADROUTER_MODELS = {
 			cacheRead: 0,
 			cacheWrite: 0,
 		},
-		contextWindow: 131072,
-		maxTokens: 4096,
+		contextWindow: 1048576,
+		maxTokens: 65536,
 	} satisfies Model<"adrouter-agent">,
 	"mimo-v2.5-pro": {
 		id: "mimo-v2.5-pro",
@@ -148,8 +201,8 @@ export const ADROUTER_MODELS = {
 			cacheRead: 0,
 			cacheWrite: 0,
 		},
-		contextWindow: 131072,
-		maxTokens: 4096,
+		contextWindow: 1048576,
+		maxTokens: 131072,
 	} satisfies Model<"adrouter-agent">,
 	"agnes-2.0-flash": {
 		id: "agnes-2.0-flash",
@@ -166,8 +219,8 @@ export const ADROUTER_MODELS = {
 			cacheRead: 0,
 			cacheWrite: 0,
 		},
-		contextWindow: 131072,
-		maxTokens: 4096,
+		contextWindow: 524288,
+		maxTokens: 65536,
 	} satisfies Model<"adrouter-agent">,
 	"agnes-2.5-flash": {
 		id: "agnes-2.5-flash",
@@ -184,8 +237,8 @@ export const ADROUTER_MODELS = {
 			cacheRead: 0,
 			cacheWrite: 0,
 		},
-		contextWindow: 131072,
-		maxTokens: 4096,
+		contextWindow: 524288,
+		maxTokens: 65536,
 	} satisfies Model<"adrouter-agent">,
 	"agnes-2.5-pro": {
 		id: "agnes-2.5-pro",
@@ -202,8 +255,8 @@ export const ADROUTER_MODELS = {
 			cacheRead: 0,
 			cacheWrite: 0,
 		},
-		contextWindow: 131072,
-		maxTokens: 4096,
+		contextWindow: 1048576,
+		maxTokens: 131072,
 	} satisfies Model<"adrouter-agent">,
 	"agnes-2.5-pro-alpha": {
 		id: "agnes-2.5-pro-alpha",
@@ -220,7 +273,7 @@ export const ADROUTER_MODELS = {
 			cacheRead: 0,
 			cacheWrite: 0,
 		},
-		contextWindow: 131072,
-		maxTokens: 4096,
+		contextWindow: 1048576,
+		maxTokens: 196608,
 	} satisfies Model<"adrouter-agent">,
 } as const;

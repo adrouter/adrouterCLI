@@ -22,9 +22,11 @@ mode; extension commands, tools, and skills are unavailable in that mode.
 - Model selection: use `agnes-2.0-flash`, `agnes-2.5-flash`, `agnes-2.5-pro`,
   `agnes-2.5-pro-alpha`, `deepseek-v4-flash`, `deepseek-v4-pro`, `mimo-v2.5`, or `mimo-v2.5-pro`
   for the hosted beta.
-- Context limits: all eight hosted models have a 131,072-token total window, with 126,976 input and 4,096
-  output tokens. A growing session normally compacts automatically above about 114,688 estimated
-  tokens. If one compact-and-retry still reports that the context is too large, run `/compact`, then
+- Context limits: hosted context is 524,288 or 1,048,576 tokens, maximum input ranges from 458,752
+  to 917,504, and maximum output ranges from 65,536 to 196,608. A growing session compacts at the
+  lower of the selected model's maximum input and its context minus the 16,384-token reserve. Router
+  still defaults omitted output and new account ceilings to 4,096. If one compact-and-retry still
+  reports that the context is too large, run `/compact`, then
   reduce or split the largest message, pasted file, tool schema, or tool result. A single irreducible
   input cannot be made sendable by summarizing older history. Do not blindly retry a partial streamed
   response; the CLI deliberately refuses to replay it.

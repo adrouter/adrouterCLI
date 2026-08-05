@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.81.0-beta.19] - 2026-08-03
+
+### Changed
+
+- Synchronized exact model-specific context, input, and output limits from Router and propagated
+  them through offline listing, selected-model compaction, and installed-package verification.
+- Kept one compact-and-retry before response events and preserved the no-replay rule after any
+  sponsored or paid stream event.
+
 ## [0.81.0-beta.18] - 2026-08-02
 
 ### Changed

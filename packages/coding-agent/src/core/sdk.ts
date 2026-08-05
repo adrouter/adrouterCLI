@@ -132,6 +132,29 @@ function getDefaultAgentDir(): string {
 }
 
 function canonicalizeSessionModel(model: Model<any>, registry: ModelRegistry): Model<any> {
+	if (
+		registry.isLocked() &&
+		model.provider === "adrouter" &&
+		!isOfficialAdRouterApiUrl(resolveAdRouterApiUrl(registry.authStorage))
+	) {
+		if (
+			!Number.isInteger(model.contextWindow) ||
+			model.contextWindow <= 0 ||
+			!Number.isInteger(model.maxTokens) ||
+			model.maxTokens <= 0
+		) {
+			throw new Error(`Model "${model.provider}/${model.id}" has invalid custom context or output limits.`);
+		}
+		const base = registry.find("adrouter", model.id) ?? registry.find("adrouter", "deepseek-v4-flash");
+		if (!base) throw new Error("The official AdRouter base model is unavailable");
+		return {
+			...base,
+			id: model.id,
+			name: model.name || model.id,
+			contextWindow: model.contextWindow,
+			maxTokens: model.maxTokens,
+		};
+	}
 	const registered = registry.find(model.provider, model.id);
 	if (registered) {
 		if (registry.isLocked() && !hasCanonicalRuntimeProperties(model, registered)) {
@@ -140,15 +163,6 @@ function canonicalizeSessionModel(model: Model<any>, registry: ModelRegistry): M
 			);
 		}
 		return registered;
-	}
-	if (
-		registry.isLocked() &&
-		model.provider === "adrouter" &&
-		!isOfficialAdRouterApiUrl(resolveAdRouterApiUrl(registry.authStorage))
-	) {
-		const base = registry.find("adrouter", "deepseek-v4-flash");
-		if (!base) throw new Error("The official AdRouter base model is unavailable");
-		return { ...base, id: model.id, name: model.name || model.id };
 	}
 	throw new Error(
 		`Model "${model.provider}/${model.id}" is not registered. Use ModelRegistry.inMemory() and register the model explicitly.`,

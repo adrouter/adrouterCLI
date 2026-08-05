@@ -7,6 +7,12 @@ Unified LLM API with provider collections, automatic auth resolution, token and 
 
 **Note**: This library only includes models that support tool calling (function calling), as this is essential for agentic workflows.
 
+The official AdRouter catalog exports `ADROUTER_HOSTED_LIMITS_BY_MODEL`. Each canonical model ID has
+its own `contextWindowTokens`, `maxInputTokens`, and `maxOutputTokens`; callers must select by ID and
+must not infer a shared tuple. An omitted AdRouter output limit remains omitted so Router's
+conservative 4,096-token request/account default stays authoritative. Explicit custom or loopback
+AdRouter models use their supplied `contextWindow` and `maxTokens` metadata.
+
 ## Table of Contents
 
 - [Supported Providers](#supported-providers)
