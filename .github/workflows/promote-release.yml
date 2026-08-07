@@ -86,11 +86,11 @@ jobs:
       - name: Verify the recorded package is resumable
         run: node scripts/verify-npm-release.mjs --state resumable
       - name: Attest the exact npm-published tarball
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: release-assets/adrouter-cli-*.tgz
       - name: Attest the exact npm artifact manifest
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: release-assets/npm-artifacts.json
       - name: Checkout protected verifier from the workflow commit

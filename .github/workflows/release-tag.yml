@@ -53,24 +53,24 @@ jobs:
           node scripts/release-notes.mjs extract --version "${GITHUB_REF_NAME#v}" --tag "${GITHUB_REF_NAME}" --out release-assets/RELEASE_NOTES.md
           (cd release-assets && sha256sum adrouter-cli-*.tgz npm-artifacts.json adrouterCLI.cdx.json BUNDLED_SOURCES.json THIRD_PARTY_NOTICES.md > SHA256SUMS)
       - name: Attest bundled npm tarball
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: release-assets/adrouter-cli-*.tgz
       - name: Attest npm artifact manifest
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: release-assets/npm-artifacts.json
       - name: Attest SBOM
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: release-assets/adrouterCLI.cdx.json
           sbom-path: release-assets/adrouterCLI.cdx.json
       - name: Attest bundled-source inventory
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: release-assets/BUNDLED_SOURCES.json
       - name: Attest third-party notices
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: release-assets/THIRD_PARTY_NOTICES.md
       - name: Stage draft release
