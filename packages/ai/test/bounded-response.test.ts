@@ -1,7 +1,24 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ResponseBodyLimitError, readBoundedResponseText } from "../src/utils/bounded-response.ts";
 
 describe("bounded response reader", () => {
+	afterEach(() => vi.useRealTimers());
+	it("does not wait for a stuck transport to acknowledge cancellation", async () => {
+		vi.useFakeTimers();
+		const body = new ReadableStream<Uint8Array>({ cancel: () => new Promise<void>(() => {}) });
+		let outcome: unknown;
+		void readBoundedResponseText(new Response(body), {
+			maxBytes: 100,
+			idleTimeoutMs: 10,
+			overallTimeoutMs: 100,
+		}).catch((error) => {
+			outcome = error;
+		});
+		await vi.advanceTimersByTimeAsync(11);
+		expect(outcome).toBeInstanceOf(ResponseBodyLimitError);
+		expect(body.locked).toBe(false);
+	});
+
 	it("cancels a body that exceeds its byte budget", async () => {
 		let cancelled = false;
 		const body = new ReadableStream<Uint8Array>({
