@@ -592,3 +592,55 @@ Record exact local, candidate, public, and hosted identities and leave the relea
 | 2026-08-11 | Expose a safe subagent subset. | New upstream automation surfaces exceed current AdRouter trust and approval boundaries. | Structured, depth-one delegation ships without missions, schedules, scripts, or worktrees. |
 | 2026-08-11 | Port desktop behavior natively after CLI qualification. | The Agent does not execute arbitrary Pi extensions and owns separate release inputs. | Agent uses exact Pi 0.84.1 dependencies plus native cache and task-delegation abstractions. |
 | 2026-08-11 | Finalize security releases before publishing follow-on candidates. | The security-only identities must remain reviewable and accepted before the broader upstream wave. | Beta.21/beta.17 become public first; the next CLI/Agent versions stop at `candidate`. |
+
+
+# Streaming-reliability candidate 0.81.0-beta.24 — 10 September 2026
+
+## Goal
+Publish the demonstrated local stream-handling corrections as 0.81.0-beta.24 on npm candidate through adrouter/adrouterCLI. Preserve beta/latest and all previous immutable versions.
+
+## Context and constraints
+This isolated checkout starts from original-repository main. Original dirty checkout, unrelated governance/GitLab changes and parked work remain untouched. Only streaming fixes/tests and release metadata are included. No new dependencies, API/IPC/state changes, account-policy changes, limit increases or Router deployment. Historical Desktop incident remains unverified (0/3 hosted reproduction attempts, $0).
+
+## Step A: Prepare and validate
+### Status
+`in_progress`
+- [x] Verify version/tag unused and copy reviewed fixes.
+- [x] Update current release metadata while preserving historical evidence.
+- [ ] Run full platform release gates and review diff.
+### Validation Results
+Pending for this exact release version; previous source regression evidence is recorded in workspace docs/streaming-and-model-limits-2026-09-10.md.
+
+## Step B: Review, stage and publish candidate
+### Status
+`todo`
+- [ ] Commit clean inputs; open PR against original main; require CI and normal protected review/merge.
+- [ ] Verify authentication and exact-tag protected rules; stage and verify immutable artifacts from merged SHA.
+- [ ] Publish only candidate with matching workflow ref/tag; verify required registry smoke checks.
+### Validation Results
+Not run.
+
+## Step C: Final verification and cleanup
+### Status
+`todo`
+- [ ] Independently compare npm integrity and staged artifacts; record SHA, tag, checksums and workflow URLs.
+- [ ] Verify beta/latest unchanged and preserve unrelated work.
+### Validation Results
+Not run.
+
+## Follow-up Work
+After all three client candidates verify, append the workspace roadmap TODO to double 4096 output defaults to 8192; no limit changes in this release. Physical acceptance and final beta/latest promotion require separate authorization.
+
+## Decision Log
+| Date | Decision | Rationale |
+| --- | --- | --- |
+| 2026-09-10 | New immutable 0.81.0-beta.24 on existing candidate channel | Approved release plan; published versions cannot be modified |
+| 2026-09-10 | Original adrouter repository; adrouter-co backup only | Existing protected workflows and user-selected release destination |
+
+### Local validation note
+The first isolated full-suite run passed all but one existing rendering assertion: the long release-checkout path wrapped at the fixture's fixed 120-column width. Moved only this isolated checkout to adrouter_release/r/cli; no test or product code was changed for that environment issue. Rerunning the full isolated suite at the shorter path.
+
+### Beta.24 local gate results
+Node 24.16.0 (supported >=22.19) npm ci --ignore-scripts, build, check, and release-readiness passed. Full isolated tests passed after shortening the release-checkout path; coding-agent suite: 183 files / 1533 tests passed, 6 files / 46 tests skipped by existing credential/environment gates. No product/test workaround was made for the path-dependent first-run failure. New stream regression tests are part of the passing suite. Bundled package smoke remains the final local packaging gate before PR.
+
+Bundled ci-package-smoke passed: staged tarball installation, deployable doctor, exact offline models, dependency tree, runtime/reload/new contracts, and reversible local profile round trip. All local pre-PR gates passed; no hosted inference credentials were used.

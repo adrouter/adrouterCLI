@@ -57,6 +57,26 @@ function mockNdjsonFetch(lines: unknown[]): void {
 }
 
 describe("AdRouter provider", () => {
+	it("rejects EOF without done while retaining partial text and blocking tools", async () => {
+		mockNdjsonFetch([
+			{ type: "text", content: "Partial answer" },
+			{ type: "tool_call", id: "read-1", name: "read_file", arguments: { path: "style.css" } },
+		]);
+		const output = stream(
+			model,
+			{ messages: [{ role: "user", content: "hello", timestamp: 0 }] },
+			{ apiKey: "fixture" },
+		);
+		const events = [];
+		for await (const event of output) events.push(event);
+		expect(events.at(-1)).toMatchObject({ type: "error" });
+		const result = await output.result();
+		expect(result.errorMessage).toContain("completion event");
+		expect(result.content).toContainEqual({ type: "text", text: "Partial answer" });
+		expect(result.content.some((block) => block.type === "toolCall")).toBe(false);
+		expect(fetch).toHaveBeenCalledTimes(1);
+	});
+
 	afterEach(() => {
 		vi.unstubAllGlobals();
 		delete process.env.ADROUTER_AD_MODE;
@@ -354,6 +374,7 @@ describe("AdRouter provider", () => {
 			},
 			{ type: "text", content: "Done" },
 			{ type: "settlement", turn_id: "turn-123", settlement: { ad_subsidy: 0.001234 } },
+			{ type: "done" },
 		]);
 
 		const message = await stream(model, { messages: [] }, { apiKey: "test-key" }).result();
@@ -424,6 +445,7 @@ describe("AdRouter provider", () => {
 				ad: { turn_id: "turn-off", tier: "NONE", reason_code: "user_opt_out", reason: "Ads disabled" },
 			},
 			{ type: "settlement", turn_id: "turn-off", settlement: { ad_subsidy: 0 } },
+			{ type: "done" },
 		]);
 
 		await stream(model, { messages: [] }, { apiKey: "test-key" }).result();
@@ -459,6 +481,7 @@ describe("AdRouter provider", () => {
 					},
 				},
 			},
+			{ type: "done" },
 		]);
 
 		const message = await stream(model, { messages: [] }, { apiKey: "test-key" }).result();

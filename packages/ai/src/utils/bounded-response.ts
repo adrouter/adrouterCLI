@@ -54,7 +54,7 @@ export async function* iterateBoundedResponse(
 	const contentLength = Number(response.headers.get("content-length"));
 	const label = options.label ?? "Response";
 	if (Number.isFinite(contentLength) && contentLength > options.maxBytes) {
-		await response.body?.cancel();
+		void response.body?.cancel().catch(() => undefined);
 		throw new ResponseBodyLimitError(`${label} exceeds the ${options.maxBytes}-byte limit.`);
 	}
 	if (!response.body) return;
@@ -79,11 +79,8 @@ export async function* iterateBoundedResponse(
 		}
 	} finally {
 		if (!completed) {
-			try {
-				await reader.cancel();
-			} catch {
-				// The transport may already be closed or aborted.
-			}
+			// Never delay an error/deadline waiting for transport acknowledgment.
+			void reader.cancel().catch(() => undefined);
 		}
 		reader.releaseLock();
 	}

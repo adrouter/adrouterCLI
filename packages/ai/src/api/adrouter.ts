@@ -967,6 +967,7 @@ async function consumeNdjsonStream(
 	const encoder = new TextEncoder();
 	const toolBudget: ToolCallBudget = { seen: new Map(), argumentBytes: 0 };
 	let eventCount = 0;
+	let sawDone = false;
 	let buffer = "";
 	const processLine = async (rawLine: string): Promise<void> => {
 		if (encoder.encode(rawLine).byteLength > MAX_ROUTER_LINE_BYTES) {
@@ -983,6 +984,7 @@ async function consumeNdjsonStream(
 			});
 		}
 		const event = JSON.parse(line) as RouterStreamEvent;
+		if (event.type === "done") sawDone = true;
 		accountEventToolCalls(event, toolBudget);
 		currentUpdate = handleRouterStreamEvent(
 			output,
@@ -1015,6 +1017,23 @@ async function consumeNdjsonStream(
 	buffer += decoder.decode();
 	if (buffer.trim()) {
 		await processLine(buffer);
+	}
+	if (!sawDone && message.stopReason !== "error" && message.stopReason !== "aborted") {
+		message.content = message.content.filter((block) => block.type !== "toolCall");
+		currentUpdate = handleRouterStreamEvent(
+			output,
+			message,
+			{
+				type: "error",
+				code: "router_stream_incomplete",
+				message: "AdRouter stream ended before its completion event. Partial output was preserved.",
+			},
+			textStarted,
+			thinkingStarted,
+			responseContentEvents,
+			currentUpdate,
+			adMode,
+		);
 	}
 	if (thinkingStarted.value) {
 		const contentIndex = message.content.findIndex((content) => content.type === "thinking");
