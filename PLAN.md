@@ -20,7 +20,7 @@ Successor candidates must preserve existing models, Desktop appearance/timeline/
 - [ ] Deliver exact macOS/Windows candidates for operator acceptance. Promotion requires separate authorization.
 
 ### Validation Results
-Local presence implementation, Router/WebUI checks, CLI checks and focused runtime/provider/RPC tests, Desktop full checks and real 60-second packaged macOS acceptance, OpenCode checks, and landing catalog checks passed. Full live Kimi/cross-surface acceptance and immutable successor publication remain incomplete. No release channels or hosted deployments changed. See [implementation receipt](../../docs/combined-candidate-implementation-2026-09-12.md) for exact counts, baseline identities and blockers.
+Local presence implementation, Router/WebUI checks, CLI checks and focused runtime/provider/RPC tests, Desktop full checks and real 60-second packaged macOS acceptance, OpenCode checks, and landing catalog checks passed. Full live Kimi/cross-surface acceptance and immutable successor publication remain incomplete. No release channels or hosted deployments changed. See implementation receipt (workspace-only reference: `../../docs/combined-candidate-implementation-2026-09-12.md`) for exact counts, baseline identities and blockers.
 
 # Plan: Queued CLI models and presence prompt
 
@@ -822,7 +822,7 @@ Keep edits scoped. New-account migration changes only the column default; revert
 - [x] Model maxima and existing account policies remain unchanged.
 
 ### Validation Results
-Local checks passed; commands, counts and unavailable database checks are recorded in [implementation and rollout evidence](../../router/docs/output-defaults-16384.md). No hosted inference or deployment was performed.
+Local checks passed; commands, counts and unavailable database checks are recorded in implementation and rollout evidence (workspace-only reference: `../../router/docs/output-defaults-16384.md`). No hosted inference or deployment was performed.
 
 ## Step B: Final verification and cleanup
 
@@ -838,7 +838,7 @@ Local checks passed; commands, counts and unavailable database checks are record
 - [x] Local changes are clearly distinguished from published/deployed state.
 
 ### Validation Results
-Local checks passed; commands, counts and unavailable database checks are recorded in [implementation and rollout evidence](../../router/docs/output-defaults-16384.md). No hosted inference or deployment was performed.
+Local checks passed; commands, counts and unavailable database checks are recorded in implementation and rollout evidence (workspace-only reference: `../../router/docs/output-defaults-16384.md`). No hosted inference or deployment was performed.
 
 ### Findings / Notes
 
@@ -878,7 +878,7 @@ Preserve completion reasons, block incomplete tools, retain settled usage and pa
 | --- | --- | --- | --- |
 | 2026-09-11 | Fix truncation before existing Fly API rollout | Explicit operator request | Database migration and client publication remain pending |
 
-Validation and deployment preflight: [Router evidence](../../router/docs/output-defaults-16384.md). Local suites passed. Hosted deployment is pending local database bootstrap/reset permission and remaining acceptance gates; no live requests made.
+Validation and deployment preflight: Router evidence (workspace-only reference: `../../router/docs/output-defaults-16384.md`). Local suites passed. Hosted deployment is pending local database bootstrap/reset permission and remaining acceptance gates; no live requests made.
 
 
 ## Four-model completion — 12 September 2026
