@@ -10,6 +10,9 @@ const expectedIds = [
 	"mimo-v2.5-pro",
 	"agnes-2.0-flash",
 	"agnes-2.5-flash",
+	"glm-5.3",
+	"qwen3.8-max",
+	"qwen3.8-flash",
 ];
 
 describe("offline model listing", () => {

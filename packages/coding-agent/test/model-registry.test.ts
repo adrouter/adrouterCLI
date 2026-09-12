@@ -13,6 +13,9 @@ const expectedIds = [
 	"mimo-v2.5-pro",
 	"agnes-2.0-flash",
 	"agnes-2.5-flash",
+	"glm-5.3",
+	"qwen3.8-max",
+	"qwen3.8-flash",
 ];
 
 const tempDirs: string[] = [];
@@ -55,7 +58,7 @@ describe("locked official model registry", () => {
 		const models = registry.getAll();
 
 		expect(registry.isLocked()).toBe(true);
-		expect(models.map(({ provider }) => provider)).toEqual(Array(6).fill("adrouter"));
+		expect(models.map(({ provider }) => provider)).toEqual(Array(9).fill("adrouter"));
 		expect(models.map(({ id }) => id)).toEqual(expectedIds);
 		expect(models).toEqual(Object.values(ADROUTER_MODELS));
 		expect(models.map(({ id, contextWindow, maxTokens }) => ({ id, contextWindow, maxTokens }))).toEqual([
@@ -65,6 +68,9 @@ describe("locked official model registry", () => {
 			{ id: "mimo-v2.5-pro", contextWindow: 1_048_576, maxTokens: 131_072 },
 			{ id: "agnes-2.0-flash", contextWindow: 524_288, maxTokens: 65_536 },
 			{ id: "agnes-2.5-flash", contextWindow: 524_288, maxTokens: 65_536 },
+			{ id: "glm-5.3", contextWindow: 1_048_576, maxTokens: 131_072 },
+			{ id: "qwen3.8-max", contextWindow: 1_000_000, maxTokens: 128_000 },
+			{ id: "qwen3.8-flash", contextWindow: 1_000_000, maxTokens: 128_000 },
 		]);
 
 		models.splice(0);

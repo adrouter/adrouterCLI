@@ -307,6 +307,7 @@ export class AgentSession {
 	private _unsubscribeAgent?: () => void;
 	private _eventListeners: AgentSessionEventListener[] = [];
 	private _isAgentRunActive = false;
+	private _agentRunAborted = false;
 	private _idleWaitPromise: Promise<void> | undefined;
 	private _resolveIdleWait: (() => void) | undefined;
 
@@ -1095,10 +1096,12 @@ export class AgentSession {
 
 	private async _runAgentPrompt(messages: AgentMessage | AgentMessage[]): Promise<void> {
 		this._isAgentRunActive = true;
+		this._agentRunAborted = false;
 		this.presence.start();
 		try {
 			await this.agent.prompt(messages);
-			while (await this._handlePostAgentRun()) {
+			while (!this._agentRunAborted && (await this._handlePostAgentRun())) {
+				if (this._agentRunAborted) break;
 				await this.presence.boundary();
 				await this.agent.continue();
 			}
@@ -1581,6 +1584,7 @@ export class AgentSession {
 	 * Abort current operation and wait for agent to become idle.
 	 */
 	async abort(): Promise<void> {
+		this._agentRunAborted = true;
 		this.abortRetry();
 		this.agent.abort();
 		this.presence.stop();
