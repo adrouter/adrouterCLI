@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.81.0-beta.25] - 2026-09-12
+
+### Changed
+
+- Gate new runtime execution after 60 seconds until a task-bound presence acknowledgement, preserving active streams and cancellation.
+
 ## [0.81.0-beta.24] - 2026-09-10
 
 ### Fixed

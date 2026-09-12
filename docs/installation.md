@@ -35,7 +35,7 @@ The installed AdRouter coding catalog is usable offline and contains `agnes-2.0-
 Agnes 2.5 Pro and Pro Alpha remain WebUI-chat models until their tool-calling contract is qualified.
 The generated model-specific context, input,
 and output tuples are listed in the [product guide](about.md#official-model-catalog). Router keeps a
-4,096-token omitted-output and default account ceiling even though explicit model maxima are higher.
+16,384-token omitted-output default bounded by account/model limits even though explicit model maxima are higher.
 Hosted discovery may validate that contract but must not silently alter it and delay local compaction.
 
 The doctor result must report `"installation":{"kind":"packaged","deployable":true}`
@@ -63,3 +63,5 @@ npm uninstall --global @adrouter/cli
 ```
 
 Uninstalling does not remove `~/.adrouter/agent`. Back it up before deleting it. Never use Gatekeeper or SmartScreen bypass instructions; a missing or invalid platform signature is a release defect.
+
+Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 tools remain gated.

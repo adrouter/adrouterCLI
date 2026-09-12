@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.81.0-beta.25] - 2026-09-12
+
+### Changed
+
+- Release in lockstep with the combined CLI candidate; preserve existing terminal behavior.
+
 ## [0.81.0-beta.24] - 2026-09-10
 
 ### Fixed

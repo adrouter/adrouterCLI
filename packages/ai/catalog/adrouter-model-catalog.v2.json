@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "catalog_digest": "sha256:ee5aba34ad122c6864045cbedc1b982ceefebeb3cfaaa5f15ab90ad34a82cb8b",
+  "catalog_digest": "sha256:6c48a4b0142dbc8a19813799c146a6bb5f828ebc3240471ce94313091b805bf3",
   "models": [
     {
       "id": "deepseek-v4-flash",
@@ -166,6 +166,87 @@
       "context_window": 1048576,
       "max_input_tokens": 786432,
       "max_output_tokens": 196608
+    },
+    {
+      "id": "glm-5.3",
+      "provider": "zai",
+      "model_class": "pro",
+      "display_name": "GLM 5.3",
+      "provider_label": "Z.AI",
+      "description": "Z.AI reasoning model with always-on thinking.",
+      "thinking_levels": [
+        "high"
+      ],
+      "default_thinking_level": "high",
+      "input_modalities": [
+        "text"
+      ],
+      "tool_calling": true,
+      "context_window": 1048576,
+      "max_input_tokens": 851968,
+      "max_output_tokens": 131072
+    },
+    {
+      "id": "qwen3.8-max",
+      "provider": "qwen",
+      "model_class": "pro",
+      "display_name": "Qwen 3.8 Max",
+      "provider_label": "Qwen",
+      "description": "Qwen multimodal model with optional thinking.",
+      "thinking_levels": [
+        "none",
+        "high"
+      ],
+      "default_thinking_level": "high",
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "tool_calling": true,
+      "context_window": 1000000,
+      "max_input_tokens": 851968,
+      "max_output_tokens": 128000
+    },
+    {
+      "id": "qwen3.8-flash",
+      "provider": "qwen",
+      "model_class": "flash",
+      "display_name": "Qwen 3.8 Flash",
+      "provider_label": "Qwen",
+      "description": "Qwen multimodal model with optional thinking.",
+      "thinking_levels": [
+        "none",
+        "high"
+      ],
+      "default_thinking_level": "high",
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "tool_calling": true,
+      "context_window": 1000000,
+      "max_input_tokens": 851968,
+      "max_output_tokens": 128000
+    },
+    {
+      "id": "kimi-k3",
+      "provider": "moonshot",
+      "model_class": "pro",
+      "display_name": "Kimi K3",
+      "provider_label": "Kimi",
+      "description": "Kimi reasoning model with memory-only WebUI continuation.",
+      "thinking_levels": [
+        "high"
+      ],
+      "default_thinking_level": "high",
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "tool_calling": false,
+      "context_window": 1048576,
+      "max_input_tokens": 851968,
+      "max_output_tokens": 131072
     }
   ]
 }

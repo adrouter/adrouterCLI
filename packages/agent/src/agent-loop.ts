@@ -1,3 +1,4 @@
+import { PresenceRequiredError } from "./presence.ts";
 /**
  * Agent loop that works with AgentMessage throughout.
  * Transforms to Message[] only at the LLM call boundary.
@@ -164,6 +165,7 @@ async function runLoop(
 	let config = initialConfig;
 	let firstTurn = true;
 	// Check for steering messages at start (user may have typed while waiting)
+	await config.beforeExecution?.(signal);
 	let pendingMessages: AgentMessage[] = (await config.getSteeringMessages?.()) || [];
 
 	// Outer loop: continues when queued follow-up messages arrive after agent would stop
@@ -177,6 +179,8 @@ async function runLoop(
 			} else {
 				firstTurn = false;
 			}
+
+			await config.beforeExecution?.(signal);
 
 			// Process pending messages (inject before next assistant response)
 			if (pendingMessages.length > 0) {
@@ -198,6 +202,8 @@ async function runLoop(
 				await emit({ type: "agent_end", messages: newMessages });
 				return;
 			}
+
+			await config.beforeExecution?.(signal);
 
 			// Check for tool calls
 			const toolCalls = message.content.filter((c) => c.type === "toolCall");
@@ -229,6 +235,7 @@ async function runLoop(
 				context: currentContext,
 				newMessages,
 			};
+			await config.beforeExecution?.(signal);
 			const nextTurnSnapshot = await config.prepareNextTurn?.(nextTurnContext);
 			if (nextTurnSnapshot) {
 				currentContext = nextTurnSnapshot.context ?? currentContext;
@@ -287,6 +294,7 @@ async function streamAssistantResponse(
 ): Promise<AssistantMessage> {
 	// Apply context transform if configured (AgentMessage[] → AgentMessage[])
 	let messages = context.messages;
+	await config.beforeExecution?.(signal);
 	if (config.transformContext) {
 		messages = await config.transformContext(messages, signal);
 	}
@@ -301,12 +309,14 @@ async function streamAssistantResponse(
 		tools: context.tools,
 	};
 
+	await config.beforeExecution?.(signal);
 	const streamFunction = streamFn || streamSimple;
 
 	// Resolve API key (important for expiring tokens)
 	const resolvedApiKey =
 		(config.getApiKey ? await config.getApiKey(config.model.provider) : undefined) || config.apiKey;
 
+	await config.beforeExecution?.(signal);
 	const response = await streamFunction(config.model, llmContext, {
 		...config,
 		apiKey: resolvedApiKey,
@@ -444,6 +454,7 @@ async function executeToolCallsSequential(
 	const messages: ToolResultMessage[] = [];
 
 	for (const toolCall of toolCalls) {
+		await config.beforeExecution?.(signal);
 		await emit({
 			type: "tool_execution_start",
 			toolCallId: toolCall.id,
@@ -460,7 +471,7 @@ async function executeToolCallsSequential(
 				isError: preparation.isError,
 			};
 		} else {
-			const executed = await executePreparedToolCall(preparation, signal, emit);
+			const executed = await executePreparedToolCall(preparation, signal, emit, config);
 			finalized = await finalizeExecutedToolCall(
 				currentContext,
 				assistantMessage,
@@ -522,7 +533,7 @@ async function executeToolCallsParallel(
 		}
 
 		finalizedCalls.push(async () => {
-			const executed = await executePreparedToolCall(preparation, signal, emit);
+			const executed = await executePreparedToolCall(preparation, signal, emit, config);
 			const finalized = await finalizeExecutedToolCall(
 				currentContext,
 				assistantMessage,
@@ -692,6 +703,7 @@ async function prepareToolCall(
 			args: finalArgs,
 		};
 	} catch (error) {
+		if (error instanceof PresenceRequiredError) throw error;
 		return {
 			kind: "immediate",
 			result: createErrorToolResult(error instanceof Error ? error.message : String(error)),
@@ -704,7 +716,9 @@ async function executePreparedToolCall(
 	prepared: PreparedToolCall,
 	signal: AbortSignal | undefined,
 	emit: AgentEventSink,
+	config: AgentLoopConfig,
 ): Promise<ExecutedToolCallOutcome> {
+	await config.beforeExecution?.(signal);
 	const updateEvents: Promise<void>[] = [];
 	let acceptingUpdates = true;
 

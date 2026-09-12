@@ -8,7 +8,8 @@ import {
 } from "@adrouter/ai";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
-import { agentLoop, agentLoopContinue } from "../src/agent-loop.ts";
+import { agentLoop, agentLoopContinue, runAgentLoop } from "../src/agent-loop.ts";
+import { PresenceGate, PresenceRequiredError } from "../src/presence.ts";
 import type { AgentContext, AgentEvent, AgentLoopConfig, AgentMessage, AgentTool } from "../src/types.ts";
 
 // Mock stream for testing - mimics MockAssistantStream
@@ -1481,5 +1482,84 @@ describe("agentLoopContinue with AgentMessage", () => {
 		const messages = await stream.result();
 		expect(messages.length).toBe(1);
 		expect(messages[0].role).toBe("assistant");
+	});
+});
+
+describe("presence in the execution loop", () => {
+	it("retains a completed stream and never dispatches a tool in noninteractive mode", async () => {
+		let clock = 0;
+		const gate = new PresenceGate(
+			() => {},
+			() => clock,
+		);
+		gate.interactive = false;
+		gate.start("task");
+		let executed = 0;
+		let requests = 0;
+		const events: AgentEvent[] = [];
+		const context: AgentContext = {
+			systemPrompt: "",
+			messages: [],
+			tools: [
+				{
+					name: "read",
+					label: "Read",
+					description: "Read",
+					parameters: Type.Object({}),
+					execute: async () => {
+						executed++;
+						return { content: [{ type: "text", text: "read" }], details: {} };
+					},
+				},
+			],
+		};
+		const config: AgentLoopConfig = {
+			model: createModel(),
+			convertToLlm: identityConverter,
+			beforeExecution: (signal) => gate.boundary(signal),
+		};
+		const streamFn = () => {
+			requests++;
+			const stream = new MockAssistantStream();
+			queueMicrotask(() => {
+				clock = 60_000;
+				const message = createAssistantMessage(
+					[
+						{ type: "text", text: "Retained output" },
+						{ type: "toolCall", id: "read-1", name: "read", arguments: {} },
+					],
+					"toolUse",
+				);
+				stream.push({ type: "done", reason: "toolUse", message });
+			});
+			return stream;
+		};
+		try {
+			await expect(
+				runAgentLoop(
+					[createUserMessage("Read")],
+					context,
+					config,
+					async (event) => {
+						events.push(event);
+					},
+					undefined,
+					streamFn,
+				),
+			).rejects.toBeInstanceOf(PresenceRequiredError);
+			expect(requests).toBe(1);
+			expect(executed).toBe(0);
+			expect(
+				events.some(
+					(event) =>
+						event.type === "message_end" &&
+						event.message.role === "assistant" &&
+						event.message.content.some((block) => block.type === "text" && block.text === "Retained output"),
+				),
+			).toBe(true);
+			expect(JSON.stringify(context.messages)).not.toContain("attention_required");
+		} finally {
+			gate.stop();
+		}
 	});
 });

@@ -11,6 +11,7 @@ type FakeExtensionRunner = {
 };
 
 type FakeSession = {
+	presence: { interactive: boolean };
 	sessionManager: { getHeader: () => object | undefined };
 	agent: { waitForIdle: () => Promise<void> };
 	state: { messages: AssistantMessage[] };
@@ -64,6 +65,7 @@ function createRuntimeHost(assistantMessage: AssistantMessage): FakeRuntimeHost 
 	const state = { messages: [assistantMessage] };
 
 	const session: FakeSession = {
+		presence: { interactive: true },
 		sessionManager: { getHeader: () => undefined },
 		agent: { waitForIdle: async () => {} },
 		state,
@@ -139,4 +141,23 @@ describe("runPrintMode", () => {
 		expect(session.extensionRunner.emit).toHaveBeenCalledTimes(1);
 		expect(session.extensionRunner.emit).toHaveBeenCalledWith({ type: "session_shutdown", reason: "quit" });
 	});
+});
+
+it("returns nonzero and keeps completed output when presence blocks another round", async () => {
+	const runtimeHost = createRuntimeHost(createAssistantMessage({ text: "Completed output" }));
+	const error = vi.spyOn(console, "error").mockImplementation(() => {});
+	runtimeHost.session.prompt.mockImplementation(async () => {
+		const listener = runtimeHost.session.subscribe.mock.calls[0][0];
+		listener({ type: "attention_required", taskId: "task", promptId: "prompt" });
+		throw new Error("attention_required");
+	});
+	const result = await runPrintMode(runtimeHost as never, {
+		mode: "text",
+		initialMessage: "Start",
+		messages: ["Must remain unstarted"],
+	});
+	expect(result).toBe(1);
+	expect(runtimeHost.session.prompt).toHaveBeenCalledOnce();
+	expect(runtimeHost.session.state.messages[0].content).toContainEqual({ type: "text", text: "Completed output" });
+	expect(error).toHaveBeenCalledWith(expect.stringContaining('"type":"attention_required"'));
 });

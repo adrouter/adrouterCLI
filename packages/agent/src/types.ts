@@ -281,6 +281,7 @@ export interface AgentLoopConfig extends SimpleStreamOptions {
 	 * A blocked result can also set `terminate: true` to participate in the batch early-termination rule.
 	 * The hook receives the agent abort signal and is responsible for honoring it.
 	 */
+	beforeExecution?: (signal?: AbortSignal) => Promise<void>;
 	beforeToolCall?: (context: BeforeToolCallContext, signal?: AbortSignal) => Promise<BeforeToolCallResult | undefined>;
 	/** Called after final argument validation and immediately before an effectful tool is admitted. */
 	authorizeToolCall?: (context: ToolAuthorizationContext, signal?: AbortSignal) => Promise<ToolAuthorizationResult>;

@@ -32,3 +32,5 @@ mode; extension commands, tools, and skills are unavailable in that mode.
   response; the CLI deliberately refuses to replay it.
 
 For a bug report, include version, OS/architecture, Node version, exact safe reproduction steps, expected and actual behavior, and redacted diagnostics. Never attach credentials, raw sessions, prompts, model output, tool payloads, or personal paths.
+
+Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 tools remain gated.

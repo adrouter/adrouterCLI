@@ -4,7 +4,7 @@
 import type { Model } from "../types.ts";
 
 export const ADROUTER_CATALOG_SCHEMA_VERSION = 2 as const;
-export const ADROUTER_CATALOG_DIGEST = "sha256:ee5aba34ad122c6864045cbedc1b982ceefebeb3cfaaa5f15ab90ad34a82cb8b" as const;
+export const ADROUTER_CATALOG_DIGEST = "sha256:6c48a4b0142dbc8a19813799c146a6bb5f828ebc3240471ce94313091b805bf3" as const;
 export const ADROUTER_HOSTED_LIMITS_BY_MODEL = {
 	"deepseek-v4-flash": {
 		contextWindowTokens: 1048576,
@@ -45,6 +45,26 @@ export const ADROUTER_HOSTED_LIMITS_BY_MODEL = {
 		contextWindowTokens: 1048576,
 		maxInputTokens: 786432,
 		maxOutputTokens: 196608,
+	},
+	"glm-5.3": {
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
+	},
+	"qwen3.8-max": {
+		contextWindowTokens: 1000000,
+		maxInputTokens: 851968,
+		maxOutputTokens: 128000,
+	},
+	"qwen3.8-flash": {
+		contextWindowTokens: 1000000,
+		maxInputTokens: 851968,
+		maxOutputTokens: 128000,
+	},
+	"kimi-k3": {
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
 	},
 } as const;
 
@@ -144,6 +164,54 @@ export const ADROUTER_CATALOG_METADATA = {
 		contextWindowTokens: 1048576,
 		maxInputTokens: 786432,
 		maxOutputTokens: 196608,
+	},
+	"glm-5.3": {
+		provider: "zai",
+		modelClass: "pro",
+		description: "Z.AI reasoning model with always-on thinking.",
+		thinkingLevels: ["high"],
+		defaultThinkingLevel: "high",
+		inputModalities: ["text"],
+		toolCalling: true,
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
+	},
+	"qwen3.8-max": {
+		provider: "qwen",
+		modelClass: "pro",
+		description: "Qwen multimodal model with optional thinking.",
+		thinkingLevels: ["none","high"],
+		defaultThinkingLevel: "high",
+		inputModalities: ["text","image"],
+		toolCalling: true,
+		contextWindowTokens: 1000000,
+		maxInputTokens: 851968,
+		maxOutputTokens: 128000,
+	},
+	"qwen3.8-flash": {
+		provider: "qwen",
+		modelClass: "flash",
+		description: "Qwen multimodal model with optional thinking.",
+		thinkingLevels: ["none","high"],
+		defaultThinkingLevel: "high",
+		inputModalities: ["text","image"],
+		toolCalling: true,
+		contextWindowTokens: 1000000,
+		maxInputTokens: 851968,
+		maxOutputTokens: 128000,
+	},
+	"kimi-k3": {
+		provider: "moonshot",
+		modelClass: "pro",
+		description: "Kimi reasoning model with memory-only WebUI continuation.",
+		thinkingLevels: ["high"],
+		defaultThinkingLevel: "high",
+		inputModalities: ["text","image"],
+		toolCalling: false,
+		contextWindowTokens: 1048576,
+		maxInputTokens: 851968,
+		maxOutputTokens: 131072,
 	},
 } as const;
 
@@ -255,5 +323,59 @@ export const ADROUTER_MODELS = {
 		},
 		contextWindow: 524288,
 		maxTokens: 65536,
+	} satisfies Model<"adrouter-agent">,
+	"glm-5.3": {
+		id: "glm-5.3",
+		name: "AdRouter GLM 5.3",
+		api: "adrouter-agent",
+		provider: "adrouter",
+		baseUrl: "",
+		reasoning: true,
+		thinkingLevelMap: {"off":null,"minimal":null,"low":null,"medium":null,"high":"high","xhigh":null,"max":null},
+		input: ["text"],
+		cost: {
+			input: 0,
+			output: 0,
+			cacheRead: 0,
+			cacheWrite: 0,
+		},
+		contextWindow: 1048576,
+		maxTokens: 131072,
+	} satisfies Model<"adrouter-agent">,
+	"qwen3.8-max": {
+		id: "qwen3.8-max",
+		name: "AdRouter Qwen 3.8 Max",
+		api: "adrouter-agent",
+		provider: "adrouter",
+		baseUrl: "",
+		reasoning: true,
+		thinkingLevelMap: {"off":"none","minimal":null,"low":null,"medium":null,"high":"high","xhigh":null,"max":null},
+		input: ["text"],
+		cost: {
+			input: 0,
+			output: 0,
+			cacheRead: 0,
+			cacheWrite: 0,
+		},
+		contextWindow: 1000000,
+		maxTokens: 128000,
+	} satisfies Model<"adrouter-agent">,
+	"qwen3.8-flash": {
+		id: "qwen3.8-flash",
+		name: "AdRouter Qwen 3.8 Flash",
+		api: "adrouter-agent",
+		provider: "adrouter",
+		baseUrl: "",
+		reasoning: true,
+		thinkingLevelMap: {"off":"none","minimal":null,"low":null,"medium":null,"high":"high","xhigh":null,"max":null},
+		input: ["text"],
+		cost: {
+			input: 0,
+			output: 0,
+			cacheRead: 0,
+			cacheWrite: 0,
+		},
+		contextWindow: 1000000,
+		maxTokens: 128000,
 	} satisfies Model<"adrouter-agent">,
 } as const;

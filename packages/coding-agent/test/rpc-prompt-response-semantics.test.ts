@@ -172,6 +172,7 @@ function createRuntimeHost(options: { withAuth: boolean; responseDelayMs: number
 
 async function startRpcMode(options: { withAuth: boolean; responseDelayMs: number; model?: Model<any> }): Promise<{
 	lineHandler: (line: string) => void;
+	runtimeHost: AgentSessionRuntime;
 	cleanup: () => Promise<void>;
 }> {
 	rpcIo.outputLines = [];
@@ -181,7 +182,7 @@ async function startRpcMode(options: { withAuth: boolean; responseDelayMs: numbe
 	void runRpcMode(runtimeHost);
 	await vi.waitFor(() => expect(rpcIo.lineHandler).toBeDefined());
 
-	return { lineHandler: rpcIo.lineHandler!, cleanup };
+	return { lineHandler: rpcIo.lineHandler!, runtimeHost, cleanup };
 }
 
 describe("RPC prompt response semantics", () => {
@@ -285,4 +286,34 @@ describe("RPC prompt response semantics", () => {
 			await cleanup();
 		}
 	});
+});
+
+it("RPC binds presence acknowledgement to the current task and prompt and rejects normal input", async () => {
+	const { lineHandler, runtimeHost, cleanup } = await startRpcMode({ withAuth: true, responseDelayMs: 0 });
+	const base = Date.now();
+	const clock = vi.spyOn(Date, "now").mockReturnValue(base);
+	try {
+		runtimeHost.session.presence.start("task");
+		clock.mockReturnValue(base + 60_000);
+		const prompt = runtimeHost.session.presence.prompt!;
+		lineHandler(JSON.stringify({ id: "blocked", type: "follow_up", message: "Do not queue" }));
+		lineHandler(JSON.stringify({ id: "stale", type: "presence_ack", taskId: "old-task", promptId: prompt.promptId }));
+		clock.mockReturnValue(base + 60_250);
+		lineHandler(JSON.stringify({ id: "ack", type: "presence_ack", ...prompt }));
+		await vi.waitFor(() =>
+			expect(parseOutputLines(rpcIo.outputLines)).toContainEqual(
+				expect.objectContaining({ id: "ack", success: true }),
+			),
+		);
+		const records = parseOutputLines(rpcIo.outputLines);
+		expect(records).toContainEqual(expect.objectContaining({ type: "attention_required", ...prompt }));
+		expect(records).toContainEqual(expect.objectContaining({ id: "blocked", success: false }));
+		expect(records).toContainEqual(expect.objectContaining({ id: "stale", success: false }));
+		expect(runtimeHost.session.presence.prompt).toBeUndefined();
+		expect(JSON.stringify(runtimeHost.session.state.messages)).not.toContain("attention_required");
+	} finally {
+		clock.mockRestore();
+		runtimeHost.session.presence.stop();
+		await cleanup();
+	}
 });

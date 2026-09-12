@@ -1,3 +1,4 @@
+import { PresenceGate, type PresencePrompt } from "@adrouter/agent-core";
 /**
  * AgentSession - Core abstraction for agent lifecycle and session management.
  *
@@ -148,6 +149,8 @@ export function parseSkillBlock(text: string): ParsedSkillBlock | null {
 
 /** Session-specific events that extend the core AgentEvent */
 export type AgentSessionEvent =
+	| { type: "attention_required"; taskId: string; promptId: string }
+	| { type: "presence_cleared" }
 	| Exclude<AgentEvent, { type: "agent_end" }>
 	| {
 			type: "agent_end";
@@ -304,6 +307,7 @@ export class AgentSession {
 	private _unsubscribeAgent?: () => void;
 	private _eventListeners: AgentSessionEventListener[] = [];
 	private _isAgentRunActive = false;
+	private _agentRunAborted = false;
 	private _idleWaitPromise: Promise<void> | undefined;
 	private _resolveIdleWait: (() => void) | undefined;
 
@@ -451,8 +455,14 @@ export class AgentSession {
 	 * registered tool execution to the extension context. Tool call and tool result interception now
 	 * happens here instead of in wrappers.
 	 */
+	public readonly presence = new PresenceGate((prompt: PresencePrompt | undefined) => {
+		this._emit(prompt ? { type: "attention_required", ...prompt } : { type: "presence_cleared" });
+	});
+
 	private _installAgentToolHooks(): void {
+		this.agent.beforeExecution = (signal) => this.presence.boundary(signal);
 		this.agent.authorizeToolCall = async (context, signal) => {
+			await this.presence.boundary(signal);
 			if (context.effect === "read") return { allow: true };
 			const authorizer = this._toolAuthorizer;
 			if (!authorizer) {
@@ -462,6 +472,7 @@ export class AgentSession {
 				};
 			}
 			try {
+				this.presence.pause();
 				return await authorizer(
 					createToolApprovalRequest(this.sessionManager.getSessionId(), this._cwd, context),
 					signal,
@@ -471,6 +482,8 @@ export class AgentSession {
 					allow: false,
 					reason: error instanceof Error ? error.message : "Tool authorization failed closed.",
 				};
+			} finally {
+				this.presence.resume();
 			}
 		};
 
@@ -857,6 +870,7 @@ export class AgentSession {
 	 * Call this when completely done with the session.
 	 */
 	dispose(): void {
+		this.presence.stop();
 		try {
 			this.abortRetry();
 			this.abortCompaction();
@@ -1082,12 +1096,17 @@ export class AgentSession {
 
 	private async _runAgentPrompt(messages: AgentMessage | AgentMessage[]): Promise<void> {
 		this._isAgentRunActive = true;
+		this._agentRunAborted = false;
+		this.presence.start();
 		try {
 			await this.agent.prompt(messages);
-			while (await this._handlePostAgentRun()) {
+			while (!this._agentRunAborted && (await this._handlePostAgentRun())) {
+				if (this._agentRunAborted) break;
+				await this.presence.boundary();
 				await this.agent.continue();
 			}
 		} finally {
+			this.presence.stop();
 			this._systemPromptOverride = undefined;
 			this._flushPendingBashMessages();
 			await this._emitAgentSettled();
@@ -1134,6 +1153,7 @@ export class AgentSession {
 	 * @throws Error if no model selected or no API key available (when not streaming)
 	 */
 	async prompt(text: string, options?: PromptOptions): Promise<void> {
+		if (this.presence.prompt) throw new Error("Acknowledge the current presence prompt first.");
 		const expandPromptTemplates = options?.expandPromptTemplates ?? true;
 		const preflightResult = options?.preflightResult;
 		let messages: AgentMessage[] | undefined;
@@ -1355,6 +1375,7 @@ export class AgentSession {
 	 * @throws Error if text is an extension command
 	 */
 	async steer(text: string, images?: ImageContent[]): Promise<void> {
+		if (this.presence.prompt) throw new Error("Acknowledge the current presence prompt first.");
 		// Check for extension commands (cannot be queued)
 		if (text.startsWith("/")) {
 			this._throwIfExtensionCommand(text);
@@ -1375,6 +1396,7 @@ export class AgentSession {
 	 * @throws Error if text is an extension command
 	 */
 	async followUp(text: string, images?: ImageContent[]): Promise<void> {
+		if (this.presence.prompt) throw new Error("Acknowledge the current presence prompt first.");
 		// Check for extension commands (cannot be queued)
 		if (text.startsWith("/")) {
 			this._throwIfExtensionCommand(text);
@@ -1562,8 +1584,10 @@ export class AgentSession {
 	 * Abort current operation and wait for agent to become idle.
 	 */
 	async abort(): Promise<void> {
+		this._agentRunAborted = true;
 		this.abortRetry();
 		this.agent.abort();
+		this.presence.stop();
 		await this.waitForIdle();
 	}
 
@@ -1797,6 +1821,7 @@ export class AgentSession {
 	 * @param customInstructions Optional instructions for the compaction summary
 	 */
 	async compact(customInstructions?: string): Promise<CompactionResult> {
+		await this.presence.boundary();
 		this._disconnectFromAgent();
 		await this.abort();
 		this._compactionAbortController = new AbortController();
@@ -2142,6 +2167,7 @@ export class AgentSession {
 				details = extensionCompaction.details;
 			} else {
 				// Generate compaction result
+				await this.presence.boundary(this._autoCompactionAbortController?.signal);
 				const compactResult = await compact(
 					preparation,
 					this.model,
@@ -2738,6 +2764,7 @@ export class AgentSession {
 		onChunk?: (chunk: string) => void,
 		options?: { excludeFromContext?: boolean; operations?: BashOperations },
 	): Promise<BashResult> {
+		if (this.presence.prompt) throw new Error("Acknowledge the current presence prompt first.");
 		this._bashAbortController = new AbortController();
 
 		// Apply command prefix if configured (e.g., "shopt -s expand_aliases" for alias support)

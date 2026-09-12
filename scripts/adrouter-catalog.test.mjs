@@ -48,6 +48,10 @@ test("accepts the committed Router catalog and exposes its coding capability", (
 			{ id: "agnes-2.5-flash", input_modalities: ["text", "image"], tool_calling: true, context_window: 524_288, max_input_tokens: 458_752, max_output_tokens: 65_536 },
 			{ id: "agnes-2.5-pro", input_modalities: ["text", "image"], tool_calling: false, context_window: 1_048_576, max_input_tokens: 851_968, max_output_tokens: 131_072 },
 			{ id: "agnes-2.5-pro-alpha", input_modalities: ["text", "image"], tool_calling: false, context_window: 1_048_576, max_input_tokens: 786_432, max_output_tokens: 196_608 },
+			{"id": "glm-5.3", "input_modalities": ["text"], "tool_calling": true, "context_window": 1048576, "max_input_tokens": 851968, "max_output_tokens": 131072},
+			{"id": "qwen3.8-max", "input_modalities": ["text", "image"], "tool_calling": true, "context_window": 1000000, "max_input_tokens": 851968, "max_output_tokens": 128000},
+			{"id": "qwen3.8-flash", "input_modalities": ["text", "image"], "tool_calling": true, "context_window": 1000000, "max_input_tokens": 851968, "max_output_tokens": 128000},
+			{"id": "kimi-k3", "input_modalities": ["text", "image"], "tool_calling": false, "context_window": 1048576, "max_input_tokens": 851968, "max_output_tokens": 131072},
 		],
 	);
 });
