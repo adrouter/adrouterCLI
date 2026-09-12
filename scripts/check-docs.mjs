@@ -49,7 +49,7 @@ if (actualTable !== expectedTable) failures.push("docs/about.md: generated model
 if (!about.includes(`\`${catalog.catalog_digest}\``)) {
 	failures.push("docs/about.md: catalog digest differs from vendored catalog");
 }
-if (!about.includes("Router continues\nto use 4,096 tokens when output is omitted")) {
+if (!about.includes("Router uses\n16,384 tokens when output is omitted")) {
 	failures.push("docs/about.md: omitted-output and account default is not distinguished from model maxima");
 }
 for (const path of ["README.md", "docs/about.md", "docs/architecture.md", "docs/installation.md", "docs/troubleshooting.md"]) {

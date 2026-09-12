@@ -2795,7 +2795,28 @@ export class InteractiveMode {
 		this.showWarning("Usage: /ads [status|on|off]");
 	}
 
+	private presenceInputCleanup?: () => void;
+	private presenceInputUntil = 0;
+
 	private subscribeToAgent(): void {
+		this.presenceInputCleanup?.();
+		this.presenceInputCleanup = this.ui.addInputListener((data) => {
+			const prompt = this.session.presence.prompt;
+			if (!prompt) {
+				if (performance.now() >= this.presenceInputUntil) return undefined;
+				// Repeats extend the quiet interval so a held Enter cannot later submit text.
+				this.presenceInputUntil = performance.now() + 500;
+				return { consume: true };
+			}
+			if (data === "\x03" || data === "\x1b") {
+				void this.session.abort();
+			} else if (data === "\r" || data === "\n") {
+				if (this.session.presence.acknowledge(prompt.taskId, prompt.promptId)) {
+					this.presenceInputUntil = performance.now() + 500;
+				}
+			}
+			return { consume: true };
+		});
 		this.unsubscribe = this.session.subscribe(async (event) => {
 			await this.handleEvent(event);
 		});
@@ -2809,6 +2830,12 @@ export class InteractiveMode {
 		this.footer.invalidate();
 
 		switch (event.type) {
+			case "attention_required":
+				this.showWarning("Are you still there? Press Enter to continue. Esc or Ctrl+C cancels.");
+				break;
+			case "presence_cleared":
+				this.ui.requestRender();
+				break;
 			case "agent_start":
 				this.pendingTools.clear();
 				if (this.settingsManager.getShowTerminalProgress()) {

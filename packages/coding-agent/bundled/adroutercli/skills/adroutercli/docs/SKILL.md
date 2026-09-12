@@ -37,3 +37,5 @@ Preserve unrelated work. Read the local `AGENTS.md`, edit source rather than gen
 In-app updates are frozen for this bundled launch. `adrouter update ...` only reports the freeze and must not access the network or filesystem. User-managed package install, remove, list, and config remain available.
 
 Run focused tests, `npm run check:branding`, backend typecheck and provider verification, `./test.sh`, then `npm run release:local -- --out <temporary-directory> --force`. Smoke test Node and Bun artifacts with a temporary `HOME`. Inspect packed artifacts for bundled source, compiled web dependencies, skills, licenses, model catalog consistency, and absence of inherited profile or state paths.
+
+Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 tools remain gated.

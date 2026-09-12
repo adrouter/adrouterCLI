@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.81.0-beta.25] - 2026-09-12
+
+### Changed
+
+- Add the Router catalog for GLM-5.3 and both Qwen 3.8 models; preserve bounded response and incomplete-stream handling. Kimi remains disabled pending live coding qualification.
+
+## [0.81.0-beta.24] - 2026-09-10
+
+### Fixed
+
+- Report incomplete Router streams as errors while preserving partial output and discarding unfinished tool calls.
+- Avoid waiting indefinitely for cancellation cleanup after timeout, abort, or oversized responses.
+
 ## [0.81.0-beta.23] - 2026-08-12
 
 ### Changed

@@ -425,6 +425,17 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 	// Handle a single command
 	const handleCommand = async (command: RpcCommand): Promise<RpcResponse | undefined> => {
 		const id = command.id;
+		if (command.type === "presence_ack") {
+			return session.presence.acknowledge(command.taskId, command.promptId)
+				? success(id, command.type)
+				: error(id, command.type, "Presence acknowledgement is stale or premature.");
+		}
+		if (
+			session.presence.prompt &&
+			!["abort", "get_state", "get_messages", "get_last_assistant_text"].includes(command.type)
+		) {
+			return error(id, command.type, "Acknowledge the current presence prompt first.");
+		}
 
 		switch (command.type) {
 			// =================================================================
@@ -808,7 +819,9 @@ export async function runRpcMode(runtimeHost: AgentSessionRuntime): Promise<neve
 		) {
 			const response = parsed as Extract<RpcCommand, { type: "tool_approval_response" }>;
 			const pending = pendingToolApprovals.get(response.approvalId);
-			if (!pending) {
+			if (session.presence.prompt) {
+				output(error(response.id, response.type, "Acknowledge the current presence prompt first."));
+			} else if (!pending) {
 				output(error(response.id, response.type, "Unknown or already-consumed tool approval request."));
 			} else if (pending.digest !== response.digest) {
 				output(error(response.id, response.type, "Tool approval digest does not match the pending request."));

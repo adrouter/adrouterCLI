@@ -34,3 +34,5 @@ Full installation, usage, configuration, privacy, security, troubleshooting, and
 - [Terminal setup](terminal-setup.md)
 
 See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and [BUNDLED_SOURCES.json](../BUNDLED_SOURCES.json) for bundled-source provenance.
+
+Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 tools remain gated.

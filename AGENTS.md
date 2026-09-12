@@ -1,5 +1,9 @@
 # AdRouterCLI repository instructions
 
+## Active release authority
+
+`adrouter` is active; `adrouter-co` is backup only. This supersedes conflicting migration guidance while preserving historical receipts. Explicit client release targets are `adrouter/adrouterCLI`, `adrouter/adrouterAgent`, and `adrouter/adrouter-opencode`. Do not infer authority from local remote names or enable backup release workflows. Combined successor candidates include new models, preserved UI/output improvements, and CLI/Desktop presence gating before acceptance; promotion remains separately authorized.
+
 ## Scope and source map
 
 This independent repository is the canonical AdRouter terminal coding agent and npm monorepo. Its
@@ -33,17 +37,7 @@ workflows, and `git status --short --branch`. Use Node.js 22.19+ and the checked
 ## Models and product invariants
 
 The hosted catalog is generated from `packages/ai/scripts/generate-models.ts`. Never hand-edit generated
-`adrouter.models.ts` files; regenerate and verify all copies. Exact models are:
-
-- `deepseek-v4-flash`, `deepseek-v4-pro`
-- `mimo-v2.5`, `mimo-v2.5-pro`
-- `agnes-2.0-flash`, `agnes-2.5-flash`
-- `agnes-2.5-pro`, `agnes-2.5-pro-alpha`
-
-Preserve the registry's per-model reasoning modes and exact tuples. Context is 524,288 or
-1,048,576; maximum input ranges from 458,752 to 917,504; maximum output ranges from 65,536 to
-196,608. Omitted request and new-account output defaults remain 4,096. Do not restore old shared
-128K, two-model, or arithmetic-derived assumptions.
+`adrouter.models.ts` files; regenerate and verify all copies. The twelve descriptors include existing DeepSeek/MiMo/Agnes models, GLM-5.3, both Qwen 3.8 models and Kimi K3. The selectable catalog is restricted to qualified coding models; Kimi tools remain gated pending live qualification. Read exact thinking modes and limits from the generated Router catalog. Omitted output delegates to the Router default, bounded by account/model/platform policy.
 
 - Keep sponsor/settlement data confined to the display panel and `/ads` controls. Never place it in
   prompts, assistant text, tools, command approvals, edits, or compacted sessions.
@@ -82,5 +76,11 @@ governance file.
 - Publish prereleases under explicit `candidate`, complete automated and manual acceptance, then
   move approved public channels. Never rely on npm's default `latest`, move an immutable tag, or
   hand-edit generated release artifacts. Fix forward with a higher beta.
+- For a protected candidate workflow, use the same exact immutable tag for the workflow's version
+  input and its dispatch ref. Do not substitute the default branch or broaden an environment
+  allowlist to make a dispatch pass.
+- If npm publication wins a propagation race but the workflow cannot immediately read the package,
+  resume only after the exact published integrity and `candidate` alias both match the intended
+  version. A mismatch is not resumable and must stop for fix-forward handling.
 - Publishing, tagging, dist-tag moves, release edits, protected approvals, and remote-secret changes
   require explicit user authorization.

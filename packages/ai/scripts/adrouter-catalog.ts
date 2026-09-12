@@ -12,6 +12,10 @@ export const ADROUTER_CATALOG_IDS = [
 	"agnes-2.5-flash",
 	"agnes-2.5-pro",
 	"agnes-2.5-pro-alpha",
+	"glm-5.3",
+	"qwen3.8-max",
+	"qwen3.8-flash",
+	"kimi-k3",
 ] as const;
 
 export type AdRouterCatalogModelId = (typeof ADROUTER_CATALOG_IDS)[number];
@@ -20,7 +24,7 @@ export type AdRouterInputModality = "text" | "image";
 
 export interface AdRouterCatalogModel {
 	id: AdRouterCatalogModelId;
-	provider: "deepseek" | "mimo" | "agnes";
+	provider: "deepseek" | "mimo" | "agnes" | "zai" | "qwen" | "moonshot";
 	model_class: "flash" | "pro";
 	display_name: string;
 	provider_label: string;
@@ -121,6 +125,10 @@ const EXPECTED_MODELS: ReadonlyArray<{
 		inputModalities: ["text", "image"],
 		toolCalling: false,
 	},
+	{"id": "glm-5.3", "provider": "zai", "modelClass": "pro", "thinkingLevels": ["high"], "defaultThinkingLevel": "high", "inputModalities": ["text"], "toolCalling": true},
+	{"id": "qwen3.8-max", "provider": "qwen", "modelClass": "pro", "thinkingLevels": ["none", "high"], "defaultThinkingLevel": "high", "inputModalities": ["text", "image"], "toolCalling": true},
+	{"id": "qwen3.8-flash", "provider": "qwen", "modelClass": "flash", "thinkingLevels": ["none", "high"], "defaultThinkingLevel": "high", "inputModalities": ["text", "image"], "toolCalling": true},
+	{"id": "kimi-k3", "provider": "moonshot", "modelClass": "pro", "thinkingLevels": ["high"], "defaultThinkingLevel": "high", "inputModalities": ["text", "image"], "toolCalling": false},
 ];
 
 const EXPECTED_LIMITS_BY_MODEL: Readonly<
@@ -137,6 +145,10 @@ const EXPECTED_LIMITS_BY_MODEL: Readonly<
 	"agnes-2.5-flash": { contextWindow: 524_288, maxInputTokens: 458_752, maxOutputTokens: 65_536 },
 	"agnes-2.5-pro": { contextWindow: 1_048_576, maxInputTokens: 851_968, maxOutputTokens: 131_072 },
 	"agnes-2.5-pro-alpha": { contextWindow: 1_048_576, maxInputTokens: 786_432, maxOutputTokens: 196_608 },
+	"glm-5.3": {"contextWindow": 1048576, "maxInputTokens": 851968, "maxOutputTokens": 131072},
+	"qwen3.8-max": {"contextWindow": 1000000, "maxInputTokens": 851968, "maxOutputTokens": 128000},
+	"qwen3.8-flash": {"contextWindow": 1000000, "maxInputTokens": 851968, "maxOutputTokens": 128000},
+	"kimi-k3": {"contextWindow": 1048576, "maxInputTokens": 851968, "maxOutputTokens": 131072},
 };
 
 const TOP_LEVEL_KEYS = ["catalog_digest", "models", "schema_version"];

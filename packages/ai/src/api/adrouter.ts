@@ -30,10 +30,13 @@ import type {
 	Usage,
 } from "../types.ts";
 import { iterateBoundedResponse, ResponseBodyLimitError, readBoundedResponseText } from "../utils/bounded-response.ts";
+import { EphemeralKimiReasoning } from "../utils/ephemeral-kimi.ts";
 import { estimateContextTokens, estimateTextTokens } from "../utils/estimate.ts";
 import { AssistantMessageEventStream } from "../utils/event-stream.ts";
 import { isValidAdRouterNonce } from "./adrouter-installation-auth-types.ts";
 import { transformMessages } from "./transform-messages.ts";
+
+const kimiMemory = new EphemeralKimiReasoning();
 
 interface RouterAssistant {
 	content?: unknown;
@@ -654,7 +657,9 @@ function toolCallSignature(toolCall: ToolCall): string {
 }
 
 function normalizeMessagesForRouter(model: Model<Api>, messages: Message[]): Message[] {
-	const transformed = transformMessages(messages, model, (id) => {
+	kimiMemory.select(resolveRouterModel(model));
+	const prepared = resolveRouterModel(model) === "kimi-k3" ? kimiMemory.prepare(messages) : messages;
+	const transformed = transformMessages(prepared, model, (id) => {
 		if (!id.includes("|")) return id;
 		const [callId] = id.split("|");
 		return callId.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 40);
@@ -905,6 +910,7 @@ export function stream(model: Model<Api>, context: Context, options?: StreamOpti
 			});
 			emitRouterJson(output, model, jsonResponse, adMode);
 		} catch (error) {
+			if ((process.env.ADROUTER_MODEL_ROUTE ?? model.id) === "kimi-k3") kimiMemory.clear();
 			const normalizedError =
 				error instanceof ResponseBodyLimitError
 					? new AdRouterApiError(error.message, { code: "router_response_limit", cause: error })
@@ -944,7 +950,9 @@ function emitRouterJson(
 		status: presentation.status,
 	};
 	publishAdRouterAds(update);
-	const message = createMessage(model, response, contentText, reasoningText, toolCalls);
+	const isKimi = resolveRouterModel(model) === "kimi-k3";
+	const message = createMessage(model, response, contentText, isKimi ? "" : reasoningText, toolCalls);
+	if (isKimi) kimiMemory.complete(message, reasoningText);
 	associateAdRouterMessage(message, { ...update, timestamp: Date.now() });
 	emitMessage(output, message);
 }
@@ -957,6 +965,8 @@ async function consumeNdjsonStream(
 	signal: AbortSignal,
 ): Promise<void> {
 	const message = beginMessage(model);
+	const isKimi = resolveRouterModel(model) === "kimi-k3";
+	let kimiReasoning = "";
 	const textStarted = { value: false };
 	const thinkingStarted = { value: false };
 	const responseContentEvents = { value: 0 };
@@ -967,6 +977,7 @@ async function consumeNdjsonStream(
 	const encoder = new TextEncoder();
 	const toolBudget: ToolCallBudget = { seen: new Map(), argumentBytes: 0 };
 	let eventCount = 0;
+	let sawDone = false;
 	let buffer = "";
 	const processLine = async (rawLine: string): Promise<void> => {
 		if (encoder.encode(rawLine).byteLength > MAX_ROUTER_LINE_BYTES) {
@@ -983,6 +994,23 @@ async function consumeNdjsonStream(
 			});
 		}
 		const event = JSON.parse(line) as RouterStreamEvent;
+		if (isKimi) {
+			if (event.type === "thinking") {
+				kimiReasoning += modelText(event.content ?? event.delta);
+				if (kimiReasoning.length > 2_000_000) {
+					kimiMemory.clear();
+					throw new Error("Kimi continuation exceeded its memory limit.");
+				}
+				event.content = undefined;
+				event.delta = undefined;
+			}
+			if (event.type === "done" && event.assistant) {
+				kimiReasoning = modelText(event.assistant.reasoning_content) || kimiReasoning;
+				event.assistant.reasoning_content = undefined;
+			}
+			if (event.type === "error") kimiMemory.clear();
+		}
+		if (event.type === "done") sawDone = true;
 		accountEventToolCalls(event, toolBudget);
 		currentUpdate = handleRouterStreamEvent(
 			output,
@@ -1016,6 +1044,24 @@ async function consumeNdjsonStream(
 	if (buffer.trim()) {
 		await processLine(buffer);
 	}
+	if (isKimi && !sawDone) kimiMemory.clear();
+	if (!sawDone && message.stopReason !== "error" && message.stopReason !== "aborted") {
+		message.content = message.content.filter((block) => block.type !== "toolCall");
+		currentUpdate = handleRouterStreamEvent(
+			output,
+			message,
+			{
+				type: "error",
+				code: "router_stream_incomplete",
+				message: "AdRouter stream ended before its completion event. Partial output was preserved.",
+			},
+			textStarted,
+			thinkingStarted,
+			responseContentEvents,
+			currentUpdate,
+			adMode,
+		);
+	}
 	if (thinkingStarted.value) {
 		const contentIndex = message.content.findIndex((content) => content.type === "thinking");
 		const block = contentIndex >= 0 ? message.content[contentIndex] : undefined;
@@ -1034,6 +1080,7 @@ async function consumeNdjsonStream(
 		output.end(message);
 		return;
 	}
+	if (isKimi) kimiMemory.complete(message, kimiReasoning);
 	if (currentUpdate) associateAdRouterMessage(message, currentUpdate);
 	output.push({ type: "done", reason: message.stopReason === "toolUse" ? "toolUse" : "stop", message });
 	output.end(message);
@@ -1110,6 +1157,7 @@ function handleRouterStreamEvent(
 			break;
 		}
 		case "error": {
+			message.content = message.content.filter((block) => block.type !== "toolCall");
 			message.stopReason = "error";
 			message.errorMessage = sanitizeTerminalText(event.message, "AdRouter stream error");
 			message.errorCode = sanitizeErrorCode(event.code);

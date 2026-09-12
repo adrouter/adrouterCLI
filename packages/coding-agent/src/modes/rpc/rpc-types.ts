@@ -19,6 +19,7 @@ import type { ToolApprovalRequest } from "../../core/tool-authorization.ts";
 // ============================================================================
 
 export type RpcCommand =
+	| { id?: string; type: "presence_ack"; taskId: string; promptId: string }
 	// Prompting
 	| { id?: string; type: "prompt"; message: string; images?: ImageContent[]; streamingBehavior?: "steer" | "followUp" }
 	| { id?: string; type: "steer"; message: string; images?: ImageContent[] }
@@ -120,6 +121,7 @@ export interface RpcSessionState {
 
 // Success responses with data
 export type RpcResponse =
+	| { id?: string; type: "response"; command: "presence_ack"; success: true }
 	// Prompting (async - events follow)
 	| { id?: string; type: "response"; command: "prompt"; success: true }
 	| { id?: string; type: "response"; command: "steer"; success: true }

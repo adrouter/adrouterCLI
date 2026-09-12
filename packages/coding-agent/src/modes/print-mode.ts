@@ -38,6 +38,7 @@ export async function runPrintMode(runtimeHost: AgentSessionRuntime, options: Pr
 	let session = runtimeHost.session;
 	let unsubscribe: (() => void) | undefined;
 	let disposed = false;
+	let attentionRequired = false;
 	const signalCleanupHandlers: Array<() => void> = [];
 
 	const disposeRuntime = async (): Promise<void> => {
@@ -73,6 +74,7 @@ export async function runPrintMode(runtimeHost: AgentSessionRuntime, options: Pr
 
 	const rebindSession = async (): Promise<void> => {
 		session = runtimeHost.session;
+		session.presence.interactive = false;
 		await session.bindExtensions({
 			mode: mode === "json" ? "json" : "print",
 			authorizeToolCall,
@@ -106,6 +108,10 @@ export async function runPrintMode(runtimeHost: AgentSessionRuntime, options: Pr
 
 		unsubscribe?.();
 		unsubscribe = session.subscribe((event) => {
+			if (event.type === "attention_required") {
+				attentionRequired = true;
+				if (mode === "text") console.error(JSON.stringify(event));
+			}
 			if (mode === "json") {
 				writeRawStdout(`${JSON.stringify(event)}\n`);
 			}
@@ -123,11 +129,16 @@ export async function runPrintMode(runtimeHost: AgentSessionRuntime, options: Pr
 		await rebindSession();
 
 		if (initialMessage) {
-			await session.prompt(initialMessage, { images: initialImages });
+			await session.prompt(initialMessage, { images: initialImages }).catch((error) => {
+				if (!attentionRequired) throw error;
+			});
 		}
 
 		for (const message of messages) {
-			await session.prompt(message);
+			if (attentionRequired) break;
+			await session.prompt(message).catch((error) => {
+				if (!attentionRequired) throw error;
+			});
 		}
 
 		if (mode === "text") {
@@ -149,7 +160,7 @@ export async function runPrintMode(runtimeHost: AgentSessionRuntime, options: Pr
 			}
 		}
 
-		return exitCode;
+		return attentionRequired ? 1 : exitCode;
 	} catch (error: unknown) {
 		console.error(error instanceof Error ? error.message : String(error));
 		return 1;

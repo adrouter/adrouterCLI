@@ -9,6 +9,7 @@ import {
 	type Transport,
 } from "@adrouter/ai/compat";
 import { runAgentLoop, runAgentLoopContinue } from "./agent-loop.ts";
+import { PresenceRequiredError } from "./presence.ts";
 import type {
 	AfterToolCallContext,
 	AfterToolCallResult,
@@ -183,6 +184,7 @@ export class Agent {
 	public getApiKey?: (provider: string) => Promise<string | undefined> | string | undefined;
 	public onPayload?: SimpleStreamOptions["onPayload"];
 	public onResponse?: SimpleStreamOptions["onResponse"];
+	public beforeExecution?: (signal?: AbortSignal) => Promise<void>;
 	public beforeToolCall?: (
 		context: BeforeToolCallContext,
 		signal?: AbortSignal,
@@ -453,6 +455,7 @@ export class Agent {
 			thinkingBudgets: this.thinkingBudgets,
 			maxRetryDelayMs: this.maxRetryDelayMs,
 			toolExecution: this.toolExecution,
+			beforeExecution: this.beforeExecution,
 			beforeToolCall: this.beforeToolCall,
 			authorizeToolCall: this.authorizeToolCall,
 			afterToolCall: this.afterToolCall,
@@ -498,6 +501,10 @@ export class Agent {
 		try {
 			await executor(abortController.signal);
 		} catch (error) {
+			if (error instanceof PresenceRequiredError) {
+				await this.processEvents({ type: "agent_end", messages: [] });
+				throw error;
+			}
 			await this.handleRunFailure(error, abortController.signal.aborted);
 		} finally {
 			this.finishRun();

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.81.0-beta.25] - 2026-09-12
+
+### Changed
+
+- Add interactive and RPC presence acknowledgement, approval timer suspension, and noninteractive attention-required exit handling. Include GLM and both Qwen models; keep Kimi disabled.
+
+## [0.81.0-beta.24] - 2026-09-10
+
+### Fixed
+
+- Report incomplete Router streams as errors while preserving partial output and discarding unfinished tool calls.
+- Avoid waiting indefinitely for cancellation cleanup after timeout, abort, or oversized responses.
+
 ## [0.81.0-beta.23] - 2026-08-12
 
 ### Changed

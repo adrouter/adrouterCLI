@@ -7,7 +7,7 @@ import {
 	getAdRouterHostedProactiveInputTokens,
 } from "../src/adrouter-config.ts";
 import { getAdRouterMessageUpdate, getLatestAdRouterAds } from "../src/adrouter-events.ts";
-import { assertAdRouterHostedInputWithinLimit, stream } from "../src/api/adrouter.ts";
+import { assertAdRouterHostedInputWithinLimit, stream, streamSimple } from "../src/api/adrouter.ts";
 import { clampThinkingLevel, getSupportedThinkingLevels } from "../src/models.ts";
 import {
 	ADROUTER_CATALOG_DIGEST,
@@ -57,6 +57,56 @@ function mockNdjsonFetch(lines: unknown[]): void {
 }
 
 describe("AdRouter provider", () => {
+	it.each([undefined, 4096, 16_384])("preserves the runtime's output limit %s", async (maxTokens) => {
+		mockNdjsonFetch([
+			{ type: "text", content: "ok" },
+			{ type: "done", assistant: { content: "ok" } },
+		]);
+		const result = await streamSimple(model, { messages: [] }, { apiKey: "fixture", maxTokens }).result();
+		expect(result.stopReason).toBe("stop");
+		const body = parseRequestBody(vi.mocked(fetch).mock.calls[0]?.[1]);
+		if (maxTokens === undefined) expect(body).not.toHaveProperty("max_output_tokens");
+		else expect(body.max_output_tokens).toBe(maxTokens);
+	});
+
+	it.each([false, true])(
+		"retains text and blocks tools after an incomplete response (truncated=%s)",
+		async (truncated) => {
+			mockNdjsonFetch([
+				{ type: "text", content: "Partial answer" },
+				{ type: "tool_call", id: "read-1", name: "read_file", arguments: { path: "style.css" } },
+				...(truncated
+					? [{ type: "error", code: "output_truncated", message: "Output reached its token limit" }]
+					: []),
+			]);
+			const output = stream(
+				model,
+				{ messages: [{ role: "user", content: "hello", timestamp: 0 }] },
+				{ apiKey: "fixture" },
+			);
+			const events = [];
+			for await (const event of output) events.push(event);
+			expect(events.at(-1)).toMatchObject({ type: "error" });
+			const result = await output.result();
+			expect(result.errorMessage).toContain(truncated ? "token limit" : "completion event");
+			expect(result.content).toContainEqual({ type: "text", text: "Partial answer" });
+			expect(result.content.some((block) => block.type === "toolCall")).toBe(false);
+			expect(fetch).toHaveBeenCalledTimes(1);
+			mockNdjsonFetch([
+				{ type: "text", content: "Recovered" },
+				{ type: "done", assistant: { content: "Recovered" } },
+			]);
+			const next = await streamSimple(
+				model,
+				{ messages: [{ role: "user", content: "Try a new prompt", timestamp: 1 }] },
+				{ apiKey: "fixture" },
+			).result();
+			expect(next.stopReason).toBe("stop");
+			expect(next.content).toContainEqual({ type: "text", text: "Recovered" });
+			expect(fetch).toHaveBeenCalledTimes(1);
+		},
+	);
+
 	afterEach(() => {
 		vi.unstubAllGlobals();
 		delete process.env.ADROUTER_AD_MODE;
@@ -354,6 +404,7 @@ describe("AdRouter provider", () => {
 			},
 			{ type: "text", content: "Done" },
 			{ type: "settlement", turn_id: "turn-123", settlement: { ad_subsidy: 0.001234 } },
+			{ type: "done" },
 		]);
 
 		const message = await stream(model, { messages: [] }, { apiKey: "test-key" }).result();
@@ -424,6 +475,7 @@ describe("AdRouter provider", () => {
 				ad: { turn_id: "turn-off", tier: "NONE", reason_code: "user_opt_out", reason: "Ads disabled" },
 			},
 			{ type: "settlement", turn_id: "turn-off", settlement: { ad_subsidy: 0 } },
+			{ type: "done" },
 		]);
 
 		await stream(model, { messages: [] }, { apiKey: "test-key" }).result();
@@ -459,6 +511,7 @@ describe("AdRouter provider", () => {
 					},
 				},
 			},
+			{ type: "done" },
 		]);
 
 		const message = await stream(model, { messages: [] }, { apiKey: "test-key" }).result();
