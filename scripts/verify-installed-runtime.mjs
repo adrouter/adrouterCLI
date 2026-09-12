@@ -13,6 +13,9 @@ export const EXPECTED_ADROUTER_MODEL_IDS = [
 	"mimo-v2.5-pro",
 	"agnes-2.0-flash",
 	"agnes-2.5-flash",
+	"glm-5.3",
+	"qwen3.8-max",
+	"qwen3.8-flash",
 ];
 export const EXPECTED_ADROUTER_LIMITS = {
 	"deepseek-v4-flash": { contextWindowTokens: 1_048_576, maxInputTokens: 917_504, maxOutputTokens: 65_536 },
@@ -23,6 +26,10 @@ export const EXPECTED_ADROUTER_LIMITS = {
 	"agnes-2.5-flash": { contextWindowTokens: 524_288, maxInputTokens: 458_752, maxOutputTokens: 65_536 },
 	"agnes-2.5-pro": { contextWindowTokens: 1_048_576, maxInputTokens: 851_968, maxOutputTokens: 131_072 },
 	"agnes-2.5-pro-alpha": { contextWindowTokens: 1_048_576, maxInputTokens: 786_432, maxOutputTokens: 196_608 },
+	"glm-5.3": { contextWindowTokens: 1_048_576, maxInputTokens: 851_968, maxOutputTokens: 131_072 },
+	"qwen3.8-max": { contextWindowTokens: 1_000_000, maxInputTokens: 851_968, maxOutputTokens: 128_000 },
+	"qwen3.8-flash": { contextWindowTokens: 1_000_000, maxInputTokens: 851_968, maxOutputTokens: 128_000 },
+	"kimi-k3": { contextWindowTokens: 1_048_576, maxInputTokens: 851_968, maxOutputTokens: 131_072 },
 };
 
 function assert(condition, message) {
@@ -46,13 +53,13 @@ export function assertAdRouterOfflineModelList(output) {
 		Object.entries(EXPECTED_ADROUTER_LIMITS).map(([id, limits]) => [
 			id,
 			{
-				context: limits.contextWindowTokens === 1_048_576 ? "1.0M" : "524.3K",
+				context: limits.contextWindowTokens === 1_000_000 ? "1M" : limits.contextWindowTokens === 1_048_576 ? "1.0M" : "524.3K",
 				maxOutput:
 					limits.maxOutputTokens === 65_536
 						? "65.5K"
 						: limits.maxOutputTokens === 131_072
 							? "131.1K"
-							: "196.6K",
+							: limits.maxOutputTokens === 128_000 ? "128K" : "196.6K",
 			},
 		]),
 	);
