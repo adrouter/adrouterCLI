@@ -1,12 +1,12 @@
 {
   "schema": 2,
-  "version": "0.81.0-beta.25",
+  "version": "0.81.0-beta.26",
   "node": ">=22.19.0",
   "release": {
     "candidateTag": "candidate",
     "finalTags": {
-      "beta": "0.81.0-beta.25",
-      "latest": "0.81.0-beta.25"
+      "beta": "0.81.0-beta.26",
+      "latest": "0.81.0-beta.26"
     },
     "githubPrerelease": true,
     "supersedes": "0.81.0-beta.20"

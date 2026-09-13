@@ -1,5 +1,6 @@
 import { generateAdRouterKeyPair } from "@adrouter/ai/api/adrouter-installation-auth";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { VERSION } from "../src/config.ts";
 import {
 	AdRouterInstallationAuth,
 	enrollAdRouterInstallation,
@@ -465,6 +466,51 @@ describe("AdRouter installation authentication", () => {
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		expect(authStorage.getAdRouterInstallation()?.refreshCredential).toBe("refresh-2");
 		expect(JSON.stringify(authStorage.getAdRouterInstallation())).not.toContain("access-2");
+	});
+
+	it("uses the running version after upgrade while preserving the enrollment version", async () => {
+		const authStorage = installationStorage();
+		const requests: Array<{ url: string; headers: Headers }> = [];
+		const fetchMock = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+			requests.push({ url: String(url), headers: new Headers(init?.headers) });
+			if (String(url).endsWith("/v1/oauth/token")) {
+				return new Response(
+					JSON.stringify({
+						access_token: "upgraded-access",
+						refresh_token: "upgraded-refresh",
+						installation_id: "installation-1",
+						expires_in: 600,
+						refresh_family_expires_in: 3600,
+					}),
+					{ status: 200, headers: { "content-type": "application/json" } },
+				);
+			}
+			return new Response(JSON.stringify({ id: "user-1", policy_mode: "enforce" }), {
+				status: 200,
+				headers: { "content-type": "application/json" },
+			});
+		});
+		const manager = new AdRouterInstallationAuth(authStorage, fetchMock as typeof fetch);
+
+		await manager.getProfile("https://api-staging.adrouter.co");
+		const access = await manager.getAccess("https://api-staging.adrouter.co");
+		const signed = await manager.signProof("https://api-staging.adrouter.co", {
+			method: "POST",
+			url: "https://api-staging.adrouter.co/v1/agent/turn",
+			body: new TextEncoder().encode("{}"),
+			accessToken: access.accessToken,
+		});
+
+		expect(requests.map(({ url }) => new URL(url).pathname)).toEqual(["/v1/oauth/token", "/v1/profile"]);
+		for (const { headers } of requests) {
+			expect(headers.get("x-adrouter-client-version")).toBe(VERSION);
+			const claims = JSON.parse(Buffer.from(headers.get("dpop")!.split(".")[1]!, "base64url").toString("utf8"));
+			expect(claims.client_version).toBe(VERSION);
+		}
+		expect(access.clientVersion).toBe(VERSION);
+		const turnClaims = JSON.parse(Buffer.from(signed.proof.split(".")[1]!, "base64url").toString("utf8"));
+		expect(turnClaims.client_version).toBe(VERSION);
+		expect(authStorage.getAdRouterInstallation()?.clientVersion).toBe("0.81.0-beta.7");
 	});
 
 	it("uses each server access nonce at most once across consecutive profile requests", async () => {

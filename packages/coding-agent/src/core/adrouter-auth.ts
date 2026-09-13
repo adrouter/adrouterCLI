@@ -628,7 +628,7 @@ export class AdRouterInstallationAuth implements InstallationAuthProvider {
 				const response = await signedProtocolRequest({
 					fetchImpl: this.fetchImpl,
 					privateJwk: installation.privateJwk,
-					clientVersion: installation.clientVersion,
+					clientVersion: VERSION,
 					method: "POST",
 					url: `${origin}${TOKEN_PATH}`,
 					body,
@@ -678,7 +678,7 @@ export class AdRouterInstallationAuth implements InstallationAuthProvider {
 				body: input.body,
 				accessToken: input.accessToken,
 				nonce: input.nonce ?? this.takeNonce(origin),
-				clientVersion: installation.clientVersion,
+				clientVersion: VERSION,
 			}),
 			contentDigest: contentDigestSha256(input.body),
 		};
@@ -708,7 +708,7 @@ export class AdRouterInstallationAuth implements InstallationAuthProvider {
 		const response = await signedProtocolRequest({
 			fetchImpl: this.fetchImpl,
 			privateJwk: installation.privateJwk,
-			clientVersion: installation.clientVersion,
+			clientVersion: VERSION,
 			method,
 			url: `${origin}${path}`,
 			body,

@@ -1,3 +1,9 @@
+## 0.81.0-beta.26 - 2026-09-12
+
+### Added
+
+- Enable Kimi K3 coding with memory-only tool continuation and preserved session isolation.
+
 # Changelog
 
 ## [0.81.0-beta.25] - 2026-09-12

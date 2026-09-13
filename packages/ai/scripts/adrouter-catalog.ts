@@ -128,7 +128,7 @@ const EXPECTED_MODELS: ReadonlyArray<{
 	{"id": "glm-5.3", "provider": "zai", "modelClass": "pro", "thinkingLevels": ["high"], "defaultThinkingLevel": "high", "inputModalities": ["text"], "toolCalling": true},
 	{"id": "qwen3.8-max", "provider": "qwen", "modelClass": "pro", "thinkingLevels": ["none", "high"], "defaultThinkingLevel": "high", "inputModalities": ["text", "image"], "toolCalling": true},
 	{"id": "qwen3.8-flash", "provider": "qwen", "modelClass": "flash", "thinkingLevels": ["none", "high"], "defaultThinkingLevel": "high", "inputModalities": ["text", "image"], "toolCalling": true},
-	{"id": "kimi-k3", "provider": "moonshot", "modelClass": "pro", "thinkingLevels": ["high"], "defaultThinkingLevel": "high", "inputModalities": ["text", "image"], "toolCalling": false},
+	{"id": "kimi-k3", "provider": "moonshot", "modelClass": "pro", "thinkingLevels": ["high"], "defaultThinkingLevel": "high", "inputModalities": ["text", "image"], "toolCalling": true},
 ];
 
 const EXPECTED_LIMITS_BY_MODEL: Readonly<

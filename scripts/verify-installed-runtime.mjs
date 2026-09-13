@@ -16,6 +16,7 @@ export const EXPECTED_ADROUTER_MODEL_IDS = [
 	"glm-5.3",
 	"qwen3.8-max",
 	"qwen3.8-flash",
+	"kimi-k3",
 ];
 export const EXPECTED_ADROUTER_LIMITS = {
 	"deepseek-v4-flash": { contextWindowTokens: 1_048_576, maxInputTokens: 917_504, maxOutputTokens: 65_536 },

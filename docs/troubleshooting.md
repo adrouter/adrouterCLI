@@ -33,4 +33,4 @@ mode; extension commands, tools, and skills are unavailable in that mode.
 
 For a bug report, include version, OS/architecture, Node version, exact safe reproduction steps, expected and actual behavior, and redacted diagnostics. Never attach credentials, raw sessions, prompts, model output, tool payloads, or personal paths.
 
-Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 tools remain gated.
+Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 (`kimi-k3`) is available from candidate 0.81.0-beta.26 with memory-only tool continuation.

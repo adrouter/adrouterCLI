@@ -4,7 +4,7 @@
 import type { Model } from "../types.ts";
 
 export const ADROUTER_CATALOG_SCHEMA_VERSION = 2 as const;
-export const ADROUTER_CATALOG_DIGEST = "sha256:6c48a4b0142dbc8a19813799c146a6bb5f828ebc3240471ce94313091b805bf3" as const;
+export const ADROUTER_CATALOG_DIGEST = "sha256:82df16507c35823aa8256f958af1e22042935399ebfd273d819459e8fe859a19" as const;
 export const ADROUTER_HOSTED_LIMITS_BY_MODEL = {
 	"deepseek-v4-flash": {
 		contextWindowTokens: 1048576,
@@ -204,11 +204,11 @@ export const ADROUTER_CATALOG_METADATA = {
 	"kimi-k3": {
 		provider: "moonshot",
 		modelClass: "pro",
-		description: "Kimi reasoning model with memory-only WebUI continuation.",
+		description: "Kimi reasoning model with memory-only conversation and tool continuation.",
 		thinkingLevels: ["high"],
 		defaultThinkingLevel: "high",
 		inputModalities: ["text","image"],
-		toolCalling: false,
+		toolCalling: true,
 		contextWindowTokens: 1048576,
 		maxInputTokens: 851968,
 		maxOutputTokens: 131072,
@@ -377,5 +377,23 @@ export const ADROUTER_MODELS = {
 		},
 		contextWindow: 1000000,
 		maxTokens: 128000,
+	} satisfies Model<"adrouter-agent">,
+	"kimi-k3": {
+		id: "kimi-k3",
+		name: "AdRouter Kimi K3",
+		api: "adrouter-agent",
+		provider: "adrouter",
+		baseUrl: "",
+		reasoning: true,
+		thinkingLevelMap: {"off":null,"minimal":null,"low":null,"medium":null,"high":"high","xhigh":null,"max":null},
+		input: ["text"],
+		cost: {
+			input: 0,
+			output: 0,
+			cacheRead: 0,
+			cacheWrite: 0,
+		},
+		contextWindow: 1048576,
+		maxTokens: 131072,
 	} satisfies Model<"adrouter-agent">,
 } as const;

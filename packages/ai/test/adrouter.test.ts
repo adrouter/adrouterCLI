@@ -57,6 +57,42 @@ function mockNdjsonFetch(lines: unknown[]): void {
 }
 
 describe("AdRouter provider", () => {
+	it("keeps Kimi tool continuation on the wire and recovers after serialization", async () => {
+		const kimi = { ...ADROUTER_MODELS["kimi-k3"], baseUrl: "https://router.example.test" };
+		const user = { role: "user" as const, content: "Read the fixture", timestamp: 1 };
+		mockNdjsonFetch([
+			{ type: "thinking", content: "private-kimi-test-reasoning" },
+			{ type: "tool_call", tool_call: { id: "read-1", name: "read_file", arguments: { path: "fixture" } } },
+			{ type: "done", assistant: { content: "", reasoning_content: "private-kimi-test-reasoning" } },
+		]);
+		const result = await streamSimple(kimi, { messages: [user] }, { apiKey: "fixture" }).result();
+		expect(result.stopReason).toBe("toolUse");
+		expect(JSON.stringify(result)).not.toContain("private-kimi");
+		const tool = {
+			role: "toolResult" as const,
+			toolCallId: "read-1",
+			toolName: "read_file",
+			content: [{ type: "text" as const, text: "fixture-content" }],
+			isError: false,
+			timestamp: 2,
+		};
+		mockNdjsonFetch([
+			{ type: "thinking", content: "followup-reasoning" },
+			{ type: "text", content: "done" },
+			{ type: "done" },
+		]);
+		await streamSimple(kimi, { messages: [user, result, tool] }, { apiKey: "fixture" }).result();
+		const sent = parseRequestBody(vi.mocked(fetch).mock.calls[0]?.[1]);
+		expect(JSON.stringify(sent.context)).toContain("private-kimi-test-reasoning");
+		expect(JSON.stringify(sent.context)).toContain("read-1");
+		mockNdjsonFetch([{ type: "text", content: "resumed" }, { type: "done" }]);
+		await streamSimple(kimi, { messages: structuredClone([user, result, tool]) }, { apiKey: "fixture" }).result();
+		const restored = parseRequestBody(vi.mocked(fetch).mock.calls[0]?.[1]);
+		expect(JSON.stringify(restored.context)).not.toContain("private-kimi");
+		expect(JSON.stringify(restored.context)).toContain("fixture-content");
+		expect(restored.context.messages.every((message: { role: string }) => message.role === "user")).toBe(true);
+	});
+
 	it.each([undefined, 4096, 16_384])("preserves the runtime's output limit %s", async (maxTokens) => {
 		mockNdjsonFetch([
 			{ type: "text", content: "ok" },
