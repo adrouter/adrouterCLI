@@ -18,7 +18,7 @@ default; selecting a model with a larger maximum does not bypass account policy.
 
 Bundled features include web access, subagents, and the BTW side panel. To diagnose startup or extension behavior, disable bundled features individually in settings or start with project resources untrusted. Re-enable them one at a time after the fault is isolated.
 
-Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 (`kimi-k3`) is available from candidate 0.81.0-beta.26 with memory-only tool continuation.
+Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 (`kimi-k3`) is available from candidate 0.81.0-beta.27 with memory-only tool continuation.
 
 
 ## Presence during long tasks

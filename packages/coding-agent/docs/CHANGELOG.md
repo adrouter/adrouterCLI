@@ -1,4 +1,6 @@
-## 0.81.0-beta.26 - 2026-09-12
+# Changelog
+
+## [0.81.0-beta.27] - 2026-09-13
 
 ### Added
 
@@ -8,8 +10,6 @@
 
 - Sign refreshes and authenticated requests with the running application version after an upgrade,
   while retaining the original enrollment version for pending authorization records.
-
-# Changelog
 
 ## [0.81.0-beta.25] - 2026-09-12
 
