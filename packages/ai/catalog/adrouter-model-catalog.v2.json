@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "catalog_digest": "sha256:6c48a4b0142dbc8a19813799c146a6bb5f828ebc3240471ce94313091b805bf3",
+  "catalog_digest": "sha256:82df16507c35823aa8256f958af1e22042935399ebfd273d819459e8fe859a19",
   "models": [
     {
       "id": "deepseek-v4-flash",
@@ -234,7 +234,7 @@
       "model_class": "pro",
       "display_name": "Kimi K3",
       "provider_label": "Kimi",
-      "description": "Kimi reasoning model with memory-only WebUI continuation.",
+      "description": "Kimi reasoning model with memory-only conversation and tool continuation.",
       "thinking_levels": [
         "high"
       ],
@@ -243,7 +243,7 @@
         "text",
         "image"
       ],
-      "tool_calling": false,
+      "tool_calling": true,
       "context_window": 1048576,
       "max_input_tokens": 851968,
       "max_output_tokens": 131072

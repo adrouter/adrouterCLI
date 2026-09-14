@@ -13,6 +13,7 @@ const expectedIds = [
 	"glm-5.3",
 	"qwen3.8-max",
 	"qwen3.8-flash",
+	"kimi-k3",
 ];
 
 describe("offline model listing", () => {

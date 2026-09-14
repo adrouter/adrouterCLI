@@ -64,4 +64,4 @@ npm uninstall --global @adrouter/cli
 
 Uninstalling does not remove `~/.adrouter/agent`. Back it up before deleting it. Never use Gatekeeper or SmartScreen bypass instructions; a missing or invalid platform signature is a release defect.
 
-Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 tools remain gated.
+Working-source catalog additions: `glm-5.3`, `qwen3.8-max`, and `qwen3.8-flash`. Hosted client acceptance and successor publication are pending; Kimi K3 (`kimi-k3`) is available from candidate 0.81.0-beta.27 with memory-only tool continuation.

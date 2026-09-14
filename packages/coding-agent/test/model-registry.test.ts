@@ -16,6 +16,7 @@ const expectedIds = [
 	"glm-5.3",
 	"qwen3.8-max",
 	"qwen3.8-flash",
+	"kimi-k3",
 ];
 
 const tempDirs: string[] = [];
@@ -58,7 +59,7 @@ describe("locked official model registry", () => {
 		const models = registry.getAll();
 
 		expect(registry.isLocked()).toBe(true);
-		expect(models.map(({ provider }) => provider)).toEqual(Array(9).fill("adrouter"));
+		expect(models.map(({ provider }) => provider)).toEqual(Array(10).fill("adrouter"));
 		expect(models.map(({ id }) => id)).toEqual(expectedIds);
 		expect(models).toEqual(Object.values(ADROUTER_MODELS));
 		expect(models.map(({ id, contextWindow, maxTokens }) => ({ id, contextWindow, maxTokens }))).toEqual([
@@ -71,6 +72,7 @@ describe("locked official model registry", () => {
 			{ id: "glm-5.3", contextWindow: 1_048_576, maxTokens: 131_072 },
 			{ id: "qwen3.8-max", contextWindow: 1_000_000, maxTokens: 128_000 },
 			{ id: "qwen3.8-flash", contextWindow: 1_000_000, maxTokens: 128_000 },
+			{ id: "kimi-k3", contextWindow: 1_048_576, maxTokens: 131_072 },
 		]);
 
 		models.splice(0);

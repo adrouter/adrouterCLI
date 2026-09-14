@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.81.0-beta.27] - 2026-09-13
+
+### Added
+
+- Enable Kimi K3 coding with memory-only tool continuation and preserved session isolation.
+
+### Fixed
+
+- Sign refreshes and authenticated requests with the running application version after an upgrade,
+  while retaining the original enrollment version for pending authorization records.
+
 ## [0.81.0-beta.25] - 2026-09-12
 
 ### Changed

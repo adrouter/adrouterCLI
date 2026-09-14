@@ -25,12 +25,12 @@ hosted models in Router order and records whether each one is qualified for codi
 | `glm-5.3` | GLM 5.3 | zai | pro | yes | high | high | 1,048,576 | 851,968 | 131,072 |
 | `qwen3.8-max` | Qwen 3.8 Max | qwen | pro | yes | none, high | high | 1,000,000 | 851,968 | 128,000 |
 | `qwen3.8-flash` | Qwen 3.8 Flash | qwen | flash | yes | none, high | high | 1,000,000 | 851,968 | 128,000 |
-| `kimi-k3` | Kimi K3 | moonshot | pro | no | high | high | 1,048,576 | 851,968 | 131,072 |
+| `kimi-k3` | Kimi K3 | moonshot | pro | yes | high | high | 1,048,576 | 851,968 | 131,072 |
 <!-- END ADROUTER MODEL TABLE -->
 
 The catalog schema is version 2. Its digest is
-`sha256:6c48a4b0142dbc8a19813799c146a6bb5f828ebc3240471ce94313091b805bf3`.
-AdRouterCLI exposes only the nine rows marked `yes`; Kimi K3, Agnes 2.5 Pro and Pro Alpha remain WebUI-chat
+`sha256:82df16507c35823aa8256f958af1e22042935399ebfd273d819459e8fe859a19`.
+AdRouterCLI exposes only the ten rows marked `yes`; Agnes 2.5 Pro and Pro Alpha remain WebUI-chat
 models until they pass the read/write tool-calling qualification gate. AdRouterCLI proactively compacts at
 the lower of that model's maximum input and its context window minus 16,384 tokens. Router uses
 16,384 tokens when output is omitted, bounded by account and model limits; the larger listed
