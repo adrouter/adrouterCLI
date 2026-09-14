@@ -932,3 +932,11 @@ CLI/Desktop now have working-source memory-only Kimi continuation using nonseria
 OpenCode now generates its catalog from Router, retaining all twelve descriptors and selecting the nine tool-qualified models. It remains text/tool-only. Catalog check, typecheck, lint, 50 tests and build passed; Kimi host-lifecycle continuation remains unfinished.
 
 Presence prompts, full authenticated cross-client matrix, browser vision acceptance, complete candidate-baseline reconciliation, packaged Desktop acceptance and successor publication remain unfinished. No candidate tags, beta/latest aliases, existing artifacts or serving API/Pages were changed. Do not publish this partial state.
+
+## Public beta.27 promotion receipt — 14 September 2026
+
+`@adrouter/cli@0.81.0-beta.27` is the approved public prerelease. Immutable tag `v0.81.0-beta.27` identifies source commit `f1deaf3ac85eceb5ad9912629faf2daa68ea2e96`; candidate PR #75 merged to active `adrouter/adrouterCLI` as `7e5b4215990ae9bb14cc6dad3d7807bc53924c4d`.
+
+The exact-tag finalization workflow passed at https://github.com/adrouter/adrouterCLI/actions/runs/34795875083, including source checks, six anonymous platform-install lanes, npm finalization and GitHub prerelease publication. npm `beta` and `latest` both resolve to beta.27, `candidate` is absent, and integrity is `sha512-g4l3CzLSQkrWOTiEv/8o4/Aa8D7QsB7mYem9WRt6bAdm72wAnx391VQzcBsjQsL6q4/eQ59Y03Nl6eJ589QCmQ==`. Superseded beta.20 is deprecated with the release-required message.
+
+The public GitHub release includes the exact npm tarball, SBOM, bundled-sources record, notices, checksum inventory, npm artifact manifest and `authentication-acceptance.json`. The recorded CLI acceptance covers macOS 15.7.9 arm64 and Windows 11 x64 with Node.js 25.9.0 and file-protected installation state.
