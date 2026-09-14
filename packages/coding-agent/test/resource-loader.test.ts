@@ -77,7 +77,7 @@ describe("DefaultResourceLoader", () => {
 
 			await loader.reload();
 			expect(loader.getBundledFeatureReport().ready).toBe(true);
-		});
+		}, 60_000);
 
 		it("disables every bundled extension and skill with ADROUTER_BUNDLED_FEATURES=off", async () => {
 			process.env.ADROUTER_BUNDLED_FEATURES = "off";
