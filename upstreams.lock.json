@@ -12,9 +12,14 @@
 				"npm_package": "@earendil-works/pi-coding-agent"
 			},
 			"active": {
-				"version": "0.81.0-lineage",
-				"commit": "e9ba9f3753ba8bc40fb5fbb84b61751e10ea9471",
-				"source_url": "https://github.com/badlogic/pi-mono/commit/e9ba9f3753ba8bc40fb5fbb84b61751e10ea9471"
+				"version": "0.85.1",
+				"tag": "v0.85.1",
+				"commit": "d981de1229ef899957bbe968bc8dcda02a21f477",
+				"source_url": "https://github.com/earendil-works/pi/archive/d981de1229ef899957bbe968bc8dcda02a21f477.tar.gz",
+				"source_sha256": "d2a04b35e57f59873d67f667f22e681e93c78a46ba8e2cdedf9d4c323b1ae8dc",
+				"npm_tarball_url": "https://registry.npmjs.org/@earendil-works/pi-coding-agent/-/pi-coding-agent-0.85.1.tgz",
+				"npm_integrity": "sha512-FGRN+OHbWaefBPGaTggAdLjrIHW+s2PzLyglz/5dfLzb9of7uuXMXYC0fJIeZTw+shS32o2cuQ9jF7YSDuL/oQ==",
+				"npm_tarball_sha256": "1f498729649bdce647d1160993b4d92bf3c614cc819213bee2f91dd34f2a7af4"
 			},
 			"target": {
 				"version": "0.85.1",

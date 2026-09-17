@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.81.0-beta.28] - 2026-09-17
+
+### Fixed
+
+- Apply the Pi 0.85.1 best-effort terminal resize refresh without changing the integrated AdRouter
+  terminal overlay.
+
 ## [0.81.0-beta.27] - 2026-09-13
 
 ### Added

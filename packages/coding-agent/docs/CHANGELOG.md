@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.81.0-beta.28] - 2026-09-17
+
+### Changed
+
+- Upgrade the reviewed Pi core adaptations to 0.85.1, pi-subagents to 0.68.0,
+  pi-cache-optimizer to 2.8.10, and pi-web-access to 0.29.0.
+- Preserve the existing public tools, commands, provider set, hosted authentication, trust and
+  approval gates, sponsor isolation, and browserless summary behavior.
+
+### Fixed
+
+- Bound decoded web response bodies, keep fetched page bodies out of session JSON, propagate
+  cancellation, scope proxy routing to web operations, and clean up extension lifecycle state.
+
 ## [0.81.0-beta.27] - 2026-09-13
 
 ### Added
