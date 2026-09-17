@@ -196,9 +196,9 @@ export function createWriteToolDefinition(
 			{ path, content }: { path: string; content: string },
 			signal?: AbortSignal,
 			_onUpdate?,
-			_ctx?,
+			ctx?,
 		) {
-			const absolutePath = resolveToCwd(path, cwd);
+			const absolutePath = resolveToCwd(path, ctx?.cwd || cwd);
 			const dir = dirname(absolutePath);
 			return withFileMutationQueue(absolutePath, async () => {
 				// Do not reject from an abort event listener here: that would release the

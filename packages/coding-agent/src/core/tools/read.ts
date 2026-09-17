@@ -235,7 +235,7 @@ export function createReadToolDefinition(
 
 					(async () => {
 						try {
-							const absolutePath = await resolveReadPathAsync(path, cwd);
+							const absolutePath = await resolveReadPathAsync(path, ctx?.cwd || cwd);
 							if (aborted) return;
 							// Check if file exists and is readable.
 							await ops.access(absolutePath);

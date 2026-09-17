@@ -392,6 +392,54 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			expect(capturedPayload.prompt_cache_key).toBe("session-2");
 			expect(capturedPayload.prompt_cache_retention).toBe("24h");
 		});
+
+		it("uses explicit prompt cache controls only when the model opts in", async () => {
+			const model = {
+				...getModel("openai", "gpt-4o-mini"),
+				compat: { supportsExplicitPromptCacheMode: true, supportsLongCacheRetention: true },
+			};
+
+			for (const [cacheRetention, expected] of [
+				["none", { mode: "explicit" }],
+				["long", { ttl: "30m" }],
+			] as const) {
+				let capturedPayload: any = null;
+				const s = streamOpenAIResponses(model, context, {
+					apiKey: "fake-key",
+					cacheRetention,
+					sessionId: "session-explicit",
+					onPayload: stopAfterPayload((payload) => {
+						capturedPayload = payload;
+					}),
+				});
+				for await (const event of s) {
+					if (event.type === "error") break;
+				}
+
+				expect(capturedPayload.prompt_cache_options).toEqual(expected);
+				expect(capturedPayload.prompt_cache_retention).toBeUndefined();
+			}
+		});
+
+		it("omits max_output_tokens when the provider rejects it", async () => {
+			const model = {
+				...getModel("openai", "gpt-4o-mini"),
+				compat: { supportsMaxOutputTokens: false },
+			};
+			let capturedPayload: any = null;
+			const s = streamOpenAIResponses(model, context, {
+				apiKey: "fake-key",
+				maxTokens: 123,
+				onPayload: stopAfterPayload((payload) => {
+					capturedPayload = payload;
+				}),
+			});
+			for await (const event of s) {
+				if (event.type === "error") break;
+			}
+
+			expect(capturedPayload.max_output_tokens).toBeUndefined();
+		});
 	});
 
 	describe("OpenAI Completions Provider", () => {

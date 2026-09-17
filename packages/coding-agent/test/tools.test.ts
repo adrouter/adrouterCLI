@@ -4,8 +4,20 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { executeBashWithOperations } from "../src/core/bash-executor.ts";
-import { type BashOperations, createBashTool, createLocalBashOperations } from "../src/core/tools/bash.ts";
+import type { ExtensionContext } from "../src/core/extensions/types.ts";
+import {
+	type BashOperations,
+	createBashTool,
+	createBashToolDefinition,
+	createLocalBashOperations,
+} from "../src/core/tools/bash.ts";
+import { createEditToolDefinition } from "../src/core/tools/edit.ts";
 import { computeEditsDiff } from "../src/core/tools/edit-diff.ts";
+import { createFindToolDefinition } from "../src/core/tools/find.ts";
+import { createGrepToolDefinition } from "../src/core/tools/grep.ts";
+import { createLsToolDefinition } from "../src/core/tools/ls.ts";
+import { createReadToolDefinition } from "../src/core/tools/read.ts";
+import { createWriteToolDefinition } from "../src/core/tools/write.ts";
 import {
 	createEditTool,
 	createFindTool,
@@ -901,6 +913,86 @@ describe("Coding Agent Tools", () => {
 			expect(output).toContain(".hidden-file");
 			expect(output).toContain(".hidden-dir/");
 		});
+	});
+});
+
+function fakeCtx(cwd: string): ExtensionContext {
+	return { cwd } as ExtensionContext;
+}
+
+describe("tool cwd resolution", () => {
+	let testDir: string;
+
+	beforeEach(() => {
+		testDir = join(tmpdir(), `coding-agent-cwd-test-${Date.now()}`);
+		mkdirSync(testDir, { recursive: true });
+	});
+
+	afterEach(() => {
+		rmSync(testDir, { recursive: true, force: true });
+	});
+
+	it("uses ctx.cwd for all built-in filesystem and command tools", async () => {
+		writeFileSync(join(testDir, "read.txt"), "hello from ctx.cwd");
+		const context = fakeCtx(testDir);
+
+		const readResult = await createReadToolDefinition("/").execute(
+			"read",
+			{ path: "read.txt" },
+			undefined,
+			undefined,
+			context,
+		);
+		expect(getTextOutput(readResult)).toContain("hello from ctx.cwd");
+
+		await createWriteToolDefinition("/").execute(
+			"write",
+			{ path: "write.txt", content: "written" },
+			undefined,
+			undefined,
+			context,
+		);
+		expect(readFileSync(join(testDir, "write.txt"), "utf-8")).toBe("written");
+
+		await createEditToolDefinition("/").execute(
+			"edit",
+			{ path: "write.txt", edits: [{ oldText: "written", newText: "edited" }] },
+			undefined,
+			undefined,
+			context,
+		);
+		expect(readFileSync(join(testDir, "write.txt"), "utf-8")).toBe("edited");
+
+		expect(
+			getTextOutput(
+				await createGrepToolDefinition("/").execute("grep", { pattern: "edited" }, undefined, undefined, context),
+			),
+		).toContain("write.txt");
+		expect(
+			getTextOutput(
+				await createFindToolDefinition("/").execute(
+					"find",
+					{ pattern: "write.txt" },
+					undefined,
+					undefined,
+					context,
+				),
+			),
+		).toContain("write.txt");
+		expect(
+			getTextOutput(await createLsToolDefinition("/").execute("ls", {}, undefined, undefined, context)),
+		).toContain("write.txt");
+		expect(
+			getTextOutput(
+				await createBashToolDefinition("/", { exposeSessionEnvironment: false }).execute(
+					"bash",
+					{ command: "pwd" },
+					undefined,
+					undefined,
+					context,
+				),
+			),
+		).toContain(testDir);
 	});
 });
 

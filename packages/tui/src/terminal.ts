@@ -41,6 +41,16 @@ export function isAppleTerminalSession(): boolean {
 	return process.platform === "darwin" && process.env.TERM_PROGRAM === "Apple_Terminal";
 }
 
+/** Refresh terminal dimensions after resume without crashing restricted hosts. */
+export function refreshTerminalDimensions(): void {
+	if (process.platform === "win32" || process.pid <= 0) return;
+	try {
+		process.kill(process.pid, "SIGWINCH");
+	} catch {
+		// Signal delivery can be denied by a container policy; dimensions will refresh on the next resize.
+	}
+}
+
 export function normalizeAppleTerminalInput(data: string, isAppleTerminal: boolean, isShiftPressed: boolean): string {
 	if (isAppleTerminal && data === "\r" && isShiftPressed) return APPLE_TERMINAL_SHIFT_ENTER_SEQUENCE;
 	return data;
@@ -157,10 +167,8 @@ export class ProcessTerminal implements Terminal {
 		process.stdout.on("resize", this.resizeHandler);
 
 		// Refresh terminal dimensions - they may be stale after suspend/resume
-		// (SIGWINCH is lost while process is stopped). Unix only.
-		if (process.platform !== "win32") {
-			process.kill(process.pid, "SIGWINCH");
-		}
+		// (SIGWINCH is lost while process is stopped). Unix only, best-effort.
+		refreshTerminalDimensions();
 
 		// On Windows, enable ENABLE_VIRTUAL_TERMINAL_INPUT so the console sends
 		// VT escape sequences (e.g. \x1b[Z for Shift+Tab) instead of raw console

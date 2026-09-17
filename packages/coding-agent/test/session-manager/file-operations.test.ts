@@ -64,6 +64,17 @@ describe("loadEntriesFromFile", () => {
 		expect(entries[1].type).toBe("message");
 	});
 
+	it("repairs a valid unterminated final entry before the next append", () => {
+		const file = join(tempDir, "unterminated.jsonl");
+		const content =
+			'{"type":"session","id":"abc","timestamp":"2025-01-01T00:00:00Z","cwd":"/tmp"}\n' +
+			'{"type":"message","id":"1","parentId":null,"timestamp":"2025-01-01T00:00:01Z","message":{"role":"user","content":"hi","timestamp":1}}';
+		writeFileSync(file, content);
+
+		expect(loadEntriesFromFile(file)).toHaveLength(2);
+		expect(readFileSync(file, "utf8")).toBe(`${content}\n`);
+	});
+
 	it("skips malformed lines but keeps valid ones", () => {
 		const file = join(tempDir, "mixed.jsonl");
 		writeFileSync(

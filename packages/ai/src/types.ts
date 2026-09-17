@@ -535,6 +535,10 @@ export interface OpenAIResponsesCompat {
 	sendSessionIdHeader?: boolean;
 	/** Whether the provider supports `prompt_cache_retention: "24h"`. Default: true. */
 	supportsLongCacheRetention?: boolean;
+	/** Whether the model accepts `prompt_cache_options` for explicit cache control. Default: false. */
+	supportsExplicitPromptCacheMode?: boolean;
+	/** Whether the provider accepts `max_output_tokens`. Default: true. */
+	supportsMaxOutputTokens?: boolean;
 }
 
 /** Compatibility settings for Anthropic Messages-compatible APIs. */
