@@ -1,7 +1,7 @@
 {
 	"schema": 1,
 	"product": "AdRouterCLI",
-	"updated_on": "2026-08-11",
+	"updated_on": "2026-09-17",
 	"components": [
 		{
 			"id": "pi-core",
@@ -17,14 +17,14 @@
 				"source_url": "https://github.com/badlogic/pi-mono/commit/e9ba9f3753ba8bc40fb5fbb84b61751e10ea9471"
 			},
 			"target": {
-				"version": "0.84.1",
-				"tag": "v0.84.1",
-				"commit": "53fa77ccd8a279eb87e92294ef3687b03ff80112",
-				"source_url": "https://github.com/earendil-works/pi/archive/53fa77ccd8a279eb87e92294ef3687b03ff80112.tar.gz",
-				"source_sha256": "2abd56747323ec382738ebb716dce2ba174bfa5c51495de7e3bfabea254f5319",
-				"npm_tarball_url": "https://registry.npmjs.org/@earendil-works/pi-coding-agent/-/pi-coding-agent-0.84.1.tgz",
-				"npm_integrity": "sha512-ncAqFrG+iybuPGOhMiZoEHkEzTpJgz3guYD32pD+M7ucc0WeHmauP6wa7qwP8V/KWvsZDVNa5XGsdZ7fkC7w7A==",
-				"npm_tarball_sha256": "a69a18596017e91955fd0fd677be69fab5b6ea01d5b06207bcee34ee1522bc20"
+				"version": "0.85.1",
+				"tag": "v0.85.1",
+				"commit": "d981de1229ef899957bbe968bc8dcda02a21f477",
+				"source_url": "https://github.com/earendil-works/pi/archive/d981de1229ef899957bbe968bc8dcda02a21f477.tar.gz",
+				"source_sha256": "d2a04b35e57f59873d67f667f22e681e93c78a46ba8e2cdedf9d4c323b1ae8dc",
+				"npm_tarball_url": "https://registry.npmjs.org/@earendil-works/pi-coding-agent/-/pi-coding-agent-0.85.1.tgz",
+				"npm_integrity": "sha512-FGRN+OHbWaefBPGaTggAdLjrIHW+s2PzLyglz/5dfLzb9of7uuXMXYC0fJIeZTw+shS32o2cuQ9jF7YSDuL/oQ==",
+				"npm_tarball_sha256": "1f498729649bdce647d1160993b4d92bf3c614cc819213bee2f91dd34f2a7af4"
 			},
 			"local_roots": ["packages/ai", "packages/agent", "packages/tui", "packages/coding-agent"],
 			"feature_disposition": {
@@ -50,12 +50,14 @@
 				"source_sha256": "fb247e0d45f130d0f3f53efb63a95c56e417d8579af5ba2ba2f211b322701374"
 			},
 			"target": {
-				"version": "0.45.2",
-				"tag": "v0.45.2",
-				"commit": "7836c0f5ef642a00ae0572c910dec7a56216c74d",
-				"source_url": "https://registry.npmjs.org/pi-subagents/-/pi-subagents-0.45.2.tgz",
-				"npm_integrity": "sha512-VEvBF6vrpi+eLEjhgwqutSnaH/aw58+Um9vdJUc6Td1asH22bAKahrgD3AafaRNsROgiaukw4DRdmlRjEhBxQA==",
-				"source_sha256": "fb247e0d45f130d0f3f53efb63a95c56e417d8579af5ba2ba2f211b322701374"
+				"version": "0.68.0",
+				"tag": "v0.68.0",
+				"commit": "f3ccf47dc236b6c0fcc0d897cec4a9e6da3e916d",
+				"source_url": "https://github.com/nicobailon/pi-subagents/archive/f3ccf47dc236b6c0fcc0d897cec4a9e6da3e916d.tar.gz",
+				"source_sha256": "0f34897c8c3ba5f73fc70a6eb155ece4fa3093b7e507111194e972cd35ff59bd",
+				"npm_tarball_url": "https://registry.npmjs.org/pi-subagents/-/pi-subagents-0.68.0.tgz",
+				"npm_integrity": "sha512-sfUKoSIegyCwnD0Y9dDE2sPm/kDmx3P85CQqRpuShv77iSWJXeEc3mDQUK1rZNbhHPnIdQSeFcK+G66hczQSgg==",
+				"npm_tarball_sha256": "ef2436e3b8f2f1fd32088c1e3652271414380275580e2eeea95d7e70c90ff935"
 			},
 			"local_modifications": [
 				"Retained the previously reviewed single, static-parallel, compatibility-chain, status, interrupt, resume, and doctor engine while porting a private-file stop control from the 0.45.2 lifecycle surface.",
@@ -77,7 +79,7 @@
 					"status": "cleared",
 					"basis": "MIT license distributed with the component"
 				},
-				"update_procedure": "Run npm run upstream:stage -- --component pi-subagents --version 0.45.2, verify the locked archive, reconstruct the reviewed AdRouter patch set, and run npm run upstream:check plus npm run check.",
+				"update_procedure": "Run npm run upstream:stage -- --component pi-subagents --version 0.68.0, verify the locked source and npm archives, reconstruct the reviewed AdRouter patch set, and run npm run upstream:check plus npm run check.",
 				"status": "source-derived-extension"
 			}
 		},
@@ -97,11 +99,14 @@
 				"source_sha256": "41eea15faef8a70ce7cb50999a3bdd4016d65435d274b883c205f0332cc420cf"
 			},
 			"target": {
-				"version": "2.8.2",
-				"commit": "dfa60b2c3e92f4a15363664c546d2042bded0b3f",
-				"source_url": "https://registry.npmjs.org/pi-cache-optimizer/-/pi-cache-optimizer-2.8.2.tgz",
-				"npm_integrity": "sha512-z5Ff2ZUF+U4O3gpV/uKTvO5046Zx/km1nDAw22b1GUKb8yslDAo1EZMlxTFTex9XGsmg/MVEt3FRmmpNNlpWvQ==",
-				"source_sha256": "41eea15faef8a70ce7cb50999a3bdd4016d65435d274b883c205f0332cc420cf"
+				"version": "2.8.10",
+				"tag": "v2.8.10",
+				"commit": "dc9be50b89957a37f8e80ef42378e3841ba8665a",
+				"source_url": "https://github.com/jiangge/pi-cache-optimizer/archive/dc9be50b89957a37f8e80ef42378e3841ba8665a.tar.gz",
+				"source_sha256": "4521d4c11f9d25df3e1a676a3c2214352861c26e44e411efe1f14dd37e1df3d7",
+				"npm_tarball_url": "https://registry.npmjs.org/pi-cache-optimizer/-/pi-cache-optimizer-2.8.10.tgz",
+				"npm_integrity": "sha512-u+Da+NDQROJuP0T1KTGLkrFRaPF0pcUCuI6KA5G2gGO/a3Z+IfoNxDF9+EmVAQ1vcu/kuQCBzvqb5QekhwAAzg==",
+				"npm_tarball_sha256": "8cf7df038bad74431e8a813c95881c47d8c90a9cd97fba754ca42247d27d46be"
 			},
 			"local_modifications": [
 				"Replaced upstream provider, model, routing-global, prompt-cache-key, retention-environment, and compat mutation with an AdRouter-only extension.",
@@ -123,7 +128,7 @@
 					"status": "cleared",
 					"basis": "MIT license distributed with the component"
 				},
-				"update_procedure": "Run npm run upstream:stage -- --component pi-cache-optimizer --version 2.8.2, verify the locked archive, reconstruct only the reviewed AdRouter stats and stable-prefix subset, and run focused byte-neutrality, state-permission, source-boundary, loader, and full repository gates.",
+				"update_procedure": "Run npm run upstream:stage -- --component pi-cache-optimizer --version 2.8.10, verify the locked source and npm archives, reconstruct only the reviewed AdRouter stats and stable-prefix subset, and run focused byte-neutrality, state-permission, source-boundary, loader, and full repository gates.",
 				"status": "source-derived-extension"
 			}
 		},
@@ -143,11 +148,14 @@
 				"source_sha256": "1a63ecb9e25daa3e0dcbe7f19703164559de85ee1bbf519e881a348b9b804000"
 			},
 			"target": {
-				"version": "0.13.0",
-				"commit": "7bdc30a65cf77273eb9c0034647b373bda4060d7",
-				"source_url": "https://registry.npmjs.org/pi-web-access/-/pi-web-access-0.13.0.tgz",
-				"npm_integrity": "sha512-ny0bHisMWdobmu1hcMp/jqjaRh6pYrH7dctBK2CVyRF4ia7bP47RnOPYdG1yiks9ohtcanWir5Hl9EFap8h0zQ==",
-				"source_sha256": "1a63ecb9e25daa3e0dcbe7f19703164559de85ee1bbf519e881a348b9b804000"
+				"version": "0.29.0",
+				"tag": "v0.29.0",
+				"commit": "192ac1875e3b8f88c78953dbc314949ec9fcaa27",
+				"source_url": "https://github.com/nicobailon/pi-web-access/archive/192ac1875e3b8f88c78953dbc314949ec9fcaa27.tar.gz",
+				"source_sha256": "52f24742fae68b315bafb1621b531e9c9beb2e3d27092ed2f960078c08963b3e",
+				"npm_tarball_url": "https://registry.npmjs.org/pi-web-access/-/pi-web-access-0.29.0.tgz",
+				"npm_integrity": "sha512-1l4sAWYkFhiBynJf/mXuxmCHxjhiAyWJ4rfQVFu8UPa0JQhCS9oXAmNXcL0Q1SfrO00plmb6L4IkypJ3n1Q4Kg==",
+				"npm_tarball_sha256": "ca8a0fb438255a5aa9ff1d544486a31fe6b100e30e02081cfcabdaa2a1635d09"
 			},
 			"local_modifications": [
 				"Redirected configuration and enabled-model state to ADROUTER_CODING_AGENT_DIR, ~/.adrouter/agent, and project .adrouter only.",

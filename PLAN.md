@@ -1,3 +1,101 @@
+# Active plan: Pi 0.85.1 and bundled-extension upgrade — 17 September 2026
+
+## Goal
+
+Upgrade the adapted Pi core and reviewed bundled extensions while preserving AdRouterCLI behavior,
+interfaces, trust boundaries, hosted authentication, sponsor isolation, and rollback compatibility.
+
+| Component | Current reviewed version | Target |
+| --- | ---: | ---: |
+| Pi core | 0.84.1 adaptations over 0.81.0 lineage | 0.85.1 |
+| pi-subagents | 0.45.2 | 0.68.0 |
+| pi-cache-optimizer | 2.8.2 | 2.8.10 |
+| pi-web-access | 0.13.0 | 0.29.0 |
+
+Keep BTW and the integrated TUI overlay, adapting them only for compatibility. Change other
+dependencies only when required by this upgrade.
+
+## Status
+
+`in_progress`
+
+## Phase 1: Preserve and verify rollback
+
+- [ ] Preserve main source SHA `0a54bad573ca5926de45a6f4ce79888086468d2f` separately from the
+  published rollback source.
+- [ ] Archive `0.81.0-beta.27` source, npm tarball, checksums, SBOM, provenance, bundled-source
+  inventory, and authentication acceptance under
+  `~/.local/share/adroutercli/rollback/0.81.0-beta.27/` without credentials or personal state.
+- [ ] Verify npm integrity and GitHub checksums; document archived-tarball reinstall and
+  `npm install --global --ignore-scripts @adrouter/cli@0.81.0-beta.27` fallback.
+- [ ] Establish pre-edit checks and synthetic upgrade/downgrade fixtures without personal state.
+
+## Phase 2: Freeze and verify upstream inputs
+
+- [ ] Freeze exact versions, commits, source URLs, archive hashes, npm integrities, licenses, and
+  dependency changes in `upstreams.lock.json`.
+- [ ] Validate GitHub source archives against source SHA-256 and npm tarballs independently against
+  npm integrity plus tarball SHA-256; add mismatch tests for both.
+- [ ] Commit intake metadata before running clean-tree `upstream:stage`.
+- [ ] Extend the adopt/adapt/defer/reject ledger for every intervening release. Treat only
+  source-derived changes as adopted.
+
+## Phase 3: Reversible implementation phases
+
+- [ ] Pi core: port applicable streaming, tool-call, session, compaction, extension-lifecycle,
+  filesystem, and terminal correctness fixes into all four packages. Preserve installation proof,
+  fresh request proofs, trust/approvals, sponsor isolation, generated models, Kimi continuation,
+  presence gates, incomplete-stream handling, SDK/RPC snapshots/exports, formats, settings, and
+  environment behavior. Retain `GoogleThinkingLevel` compatibility where needed. Ensure cleanup
+  runs once and terminating turns cannot start another request. Exclude remote/server products,
+  new tools, telemetry, self-update, new catalogs, and automatic paid retries.
+- [ ] Cache optimizer: retain byte-neutral stats-only defaults, normalized usage, DeepSeek-only
+  opt-in canonicalization, private settings, and kill switch. Exclude configuration repair and
+  added persistent statistics.
+- [ ] Subagents: port applicable lifecycle, cancellation, retained-result, and startup fixes while
+  preserving `adrouter` child execution, isolated state/environment, depth one, at most three
+  children, and at most one mutation-capable child. Exclude missions, schedules, remote execution,
+  arbitrary workflows, and nested delegation.
+- [ ] Web access: preserve existing tools, commands, browserless auto-summary, configuration paths,
+  and cookie opt-in. Port extraction, caching, cancellation, and routing fixes without new
+  providers, credential resolvers, or tools; proxy handling must not alter hosted AdRouter requests.
+
+## Phase 4: Packaging and compatibility metadata
+
+- [ ] Update versioned bundle directories, build entrypoints, imports, and fixtures together.
+- [ ] Derive the web bundle location from the canonical upstream lock.
+- [ ] Pin required dependency changes exactly and regenerate lockfile, CLI shrinkwrap,
+  bundled-source records, runtime contracts, and notices through repository tooling.
+- [ ] Keep all AdRouter packages in lockstep and separate from Pi versions. Retain Node
+  `>=22.19.0` unless adopted code proves a higher floor is required.
+- [ ] Preserve persisted formats so the rollback remains usable.
+
+## Phase 5: Verification, release, and deployment
+
+- [ ] Run focused tests after each component, followed by `npm run upstream:check`,
+  `npm run build`, `npm run check`, `npm run test:isolated`,
+  `node scripts/ci-package-smoke.mjs`, and an isolated-prefix `npm run install:local`.
+- [ ] Verify hosted auth lifecycle, doctor redaction, trust/approvals, presence and sponsor
+  isolation; streaming/truncation/cancellation/compaction/session/Kimi/SDK/RPC compatibility;
+  subagent limits and cleanup; cache byte neutrality; web configuration/browserless/proxy/package
+  behavior; and terminal/platform coverage.
+- [ ] Rehearse beta.27 -> upgraded build -> beta.27 against synthetic fixtures and document results.
+- [ ] Record unavailable physical-platform or live-auth acceptance explicitly.
+- [ ] From a clean exact commit, publish an unused immutable successor through the protected
+  candidate workflow using the same tag as workflow input and dispatch ref; verify package bytes,
+  provenance, anonymous install, GitHub release, and required acceptance.
+- [ ] Re-query public state, then promote the verified candidate through the protected finalization
+  workflow and independently verify final aliases, candidate absence, deprecation, integrity, and
+  public non-draft prerelease state.
+
+## Boundaries
+
+No general dependency refresh, new product feature, Desktop/Router change, remote-secret change, or
+unrelated channel movement. Candidate publication and final promotion remain distinct protected
+operations, both explicitly authorized by the 17 September 2026 request to deploy directly.
+
+---
+
 # Active iteration: 0.81.0-beta.27 — 13 September 2026
 
 Operator approved Kimi CLI/Desktop qualification, early OpenCode ad delivery with a permanent three-row footer, hosted Router update and immutable successor candidate publication. Kimi stays excluded from OpenCode. Preserve preceding UI/output/presence work and all historical receipts below. beta/latest stay unchanged. Needed Kimi test tokens are authorized; preserve account caps and private-data boundaries. Implementation and qualification are in progress; publication is not yet claimed. Candidate beta.26 was consumed by a tag-validation failure before artifact creation; immutable fix-forward continues as beta.27.

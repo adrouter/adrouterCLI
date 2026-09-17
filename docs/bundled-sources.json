@@ -21,7 +21,7 @@
         "Hard-capped every parallel group at three children and concurrency three, with at most one mutation-capable child; dynamic fanout, executable acceptance commands, config mutation, Gist, worktrees, external intercom, and agent-supplied executable extensions are absent from the public schema and rejected defensively.",
         "Added ADROUTER_SUBAGENTS=off without starting child processes, watchers, or state directories, and pinned exact reviewed package dependencies."
       ],
-      "update_procedure": "Run npm run upstream:stage -- --component pi-subagents --version 0.45.2, verify the locked archive, reconstruct the reviewed AdRouter patch set, and run npm run upstream:check plus npm run check.",
+      "update_procedure": "Run npm run upstream:stage -- --component pi-subagents --version 0.68.0, verify the locked source and npm archives, reconstruct the reviewed AdRouter patch set, and run npm run upstream:check plus npm run check.",
       "status": "source-derived-extension"
     },
     {
@@ -43,7 +43,7 @@
         "Restricted opt-in prompt canonicalization to official DeepSeek models and the known-stable built-in prefix; project context, skills, append prompts, dates, and working-directory text remain unchanged.",
         "Stored only the selected mode in a mode-0600 file under the AdRouter agent directory and omitted prompts, messages, headers, credentials, and usage telemetry from persistence."
       ],
-      "update_procedure": "Run npm run upstream:stage -- --component pi-cache-optimizer --version 2.8.2, verify the locked archive, reconstruct only the reviewed AdRouter stats and stable-prefix subset, and run focused byte-neutrality, state-permission, source-boundary, loader, and full repository gates.",
+      "update_procedure": "Run npm run upstream:stage -- --component pi-cache-optimizer --version 2.8.10, verify the locked source and npm archives, reconstruct only the reviewed AdRouter stats and stable-prefix subset, and run focused byte-neutrality, state-permission, source-boundary, loader, and full repository gates.",
       "status": "source-derived-extension"
     },
     {
