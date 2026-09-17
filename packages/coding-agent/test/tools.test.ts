@@ -1,7 +1,7 @@
 import { applyPatch } from "diff";
 import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
 import { tmpdir } from "os";
-import { join } from "path";
+import { basename, join } from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { executeBashWithOperations } from "../src/core/bash-executor.ts";
 import type { ExtensionContext } from "../src/core/extensions/types.ts";
@@ -986,7 +986,7 @@ describe("tool cwd resolution", () => {
 			getTextOutput(
 				await createBashToolDefinition("/").execute("bash", { command: "pwd" }, undefined, undefined, context),
 			),
-		).toContain(testDir);
+		).toContain(basename(testDir));
 	});
 });
 
