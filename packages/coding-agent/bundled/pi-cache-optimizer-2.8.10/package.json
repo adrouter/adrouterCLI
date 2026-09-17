@@ -1,6 +1,6 @@
 {
 	"name": "pi-cache-optimizer",
-	"version": "2.8.2",
+	"version": "2.8.10",
 	"description": "Reviewed AdRouter cache diagnostics and opt-in DeepSeek stable-prefix canonicalization",
 	"type": "module",
 	"license": "MIT",

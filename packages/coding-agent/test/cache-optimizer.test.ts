@@ -10,7 +10,7 @@ import cacheOptimizer, {
 	readPersistedMode,
 	resolveCacheOptimizerMode,
 	writePersistedMode,
-} from "../bundled/pi-cache-optimizer-2.8.2/index.ts";
+} from "../bundled/pi-cache-optimizer-2.8.10/index.ts";
 import type { ExtensionAPI, ExtensionContext, SessionEntry } from "../src/index.ts";
 
 type CapturedHandler = (event: unknown, context: ExtensionContext) => unknown;
@@ -180,7 +180,7 @@ describe("AdRouter cache optimizer", () => {
 	});
 
 	it("contains no provider mutation, hosted cache controls, or network hooks", () => {
-		const source = readFileSync(new URL("../bundled/pi-cache-optimizer-2.8.2/index.ts", import.meta.url), "utf8");
+		const source = readFileSync(new URL("../bundled/pi-cache-optimizer-2.8.10/index.ts", import.meta.url), "utf8");
 		for (const forbidden of [
 			"models.json",
 			"registerProvider",

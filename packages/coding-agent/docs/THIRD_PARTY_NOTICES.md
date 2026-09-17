@@ -7,7 +7,7 @@ AdRouterCLI distributes source copies of the following optional extensions in
 | Component | Version | Source | License |
 | --- | --- | --- | --- |
 | pi-subagents | 0.45.2 (reviewed AdRouter subset) | https://registry.npmjs.org/pi-subagents/-/pi-subagents-0.45.2.tgz | MIT |
-| pi-cache-optimizer | 2.8.2 (reviewed AdRouter subset) | https://registry.npmjs.org/pi-cache-optimizer/-/pi-cache-optimizer-2.8.2.tgz | MIT |
+| pi-cache-optimizer | 2.8.10 (reviewed AdRouter subset) | https://github.com/jiangge/pi-cache-optimizer/tree/dc9be50b89957a37f8e80ef42378e3841ba8665a | MIT |
 | pi-web-access | 0.13.0 | https://registry.npmjs.org/pi-web-access/-/pi-web-access-0.13.0.tgz | MIT |
 | BTW | `23017e9` | project-owner source: `~/antigravity/pi-stuff/btw` | Project-owner source; distribution authorized |
 | pi-opencode-tui-patch | 0.1.6 (`e687e69b`) | project-owner source: `~/antigravity/pi-stuff/pi-opencode-tui-patch` | Project-owner source; distribution authorized |
@@ -18,8 +18,8 @@ AdRouter retains its reviewed bounded execution engine and ports only the declar
 subset. The public schema and runtime policy remove upstream automation and authority-expanding
 surfaces; exact adaptations are listed in the bundle's `ADROUTER_PATCHES.md`.
 
-`pi-cache-optimizer@2.8.2` is pinned with npm integrity
-`sha512-z5Ff2ZUF+U4O3gpV/uKTvO5046Zx/km1nDAw22b1GUKb8yslDAo1EZMlxTFTex9XGsmg/MVEt3FRmmpNNlpWvQ==`.
+`pi-cache-optimizer@2.8.10` is pinned with source and npm archive hashes plus npm integrity
+`sha512-u+Da+NDQROJuP0T1KTGLkrFRaPF0pcUCuI6KA5G2gGO/a3Z+IfoNxDF9+EmVAQ1vcu/kuQCBzvqb5QekhwAAzg==`.
 Only truthful normalized-usage statistics and an opt-in, DeepSeek-only stable-prefix rewrite are
 retained; provider/model mutation and raw cache controls are omitted.
 

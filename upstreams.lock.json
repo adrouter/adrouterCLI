@@ -92,11 +92,14 @@
 				"npm_package": "pi-cache-optimizer"
 			},
 			"active": {
-				"version": "2.8.2",
-				"commit": "dfa60b2c3e92f4a15363664c546d2042bded0b3f",
-				"source_url": "https://registry.npmjs.org/pi-cache-optimizer/-/pi-cache-optimizer-2.8.2.tgz",
-				"npm_integrity": "sha512-z5Ff2ZUF+U4O3gpV/uKTvO5046Zx/km1nDAw22b1GUKb8yslDAo1EZMlxTFTex9XGsmg/MVEt3FRmmpNNlpWvQ==",
-				"source_sha256": "41eea15faef8a70ce7cb50999a3bdd4016d65435d274b883c205f0332cc420cf"
+				"version": "2.8.10",
+				"tag": "v2.8.10",
+				"commit": "dc9be50b89957a37f8e80ef42378e3841ba8665a",
+				"source_url": "https://github.com/jiangge/pi-cache-optimizer/archive/dc9be50b89957a37f8e80ef42378e3841ba8665a.tar.gz",
+				"source_sha256": "4521d4c11f9d25df3e1a676a3c2214352861c26e44e411efe1f14dd37e1df3d7",
+				"npm_tarball_url": "https://registry.npmjs.org/pi-cache-optimizer/-/pi-cache-optimizer-2.8.10.tgz",
+				"npm_integrity": "sha512-u+Da+NDQROJuP0T1KTGLkrFRaPF0pcUCuI6KA5G2gGO/a3Z+IfoNxDF9+EmVAQ1vcu/kuQCBzvqb5QekhwAAzg==",
+				"npm_tarball_sha256": "8cf7df038bad74431e8a813c95881c47d8c90a9cd97fba754ca42247d27d46be"
 			},
 			"target": {
 				"version": "2.8.10",
@@ -255,7 +258,7 @@
 		"bundle_directories": [
 			"adroutercli",
 			"btw-23017e9",
-			"pi-cache-optimizer-2.8.2",
+			"pi-cache-optimizer-2.8.10",
 			"pi-subagents-0.45.2",
 			"pi-web-access-0.13.0"
 		],
@@ -271,7 +274,7 @@
 			{
 				"component": "pi-cache-optimizer",
 				"name": "pi-cache-optimizer",
-				"relative_path": ["pi-cache-optimizer-2.8.2", "index.ts"],
+				"relative_path": ["pi-cache-optimizer-2.8.10", "index.ts"],
 				"commands": ["cache", "cache-optimizer"],
 				"handlers": ["before_agent_start", "message_end", "session_shutdown", "session_start"]
 			},

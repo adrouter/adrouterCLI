@@ -23,7 +23,7 @@ export const GENERATED_BUNDLED_EXTENSION_CONTRACTS = [
 		name: "pi-cache-optimizer",
 		commands: ["cache", "cache-optimizer"],
 		handlers: ["before_agent_start", "message_end", "session_shutdown", "session_start"],
-		relativePath: ["pi-cache-optimizer-2.8.2", "index.ts"],
+		relativePath: ["pi-cache-optimizer-2.8.10", "index.ts"],
 	},
 	{
 		name: "btw",
@@ -51,7 +51,7 @@ export const GENERATED_REQUIRED_BUNDLED_SKILLS = ["adroutercli", "librarian", "p
 export const GENERATED_BUNDLE_DIRECTORIES = [
 	"adroutercli",
 	"btw-23017e9",
-	"pi-cache-optimizer-2.8.2",
+	"pi-cache-optimizer-2.8.10",
 	"pi-subagents-0.45.2",
 	"pi-web-access-0.13.0",
 ] as const;

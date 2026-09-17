@@ -1,7 +1,7 @@
 # AdRouter cache optimizer adaptation
 
-This bundle is derived from `pi-cache-optimizer` 2.8.2 at commit
-`dfa60b2c3e92f4a15363664c546d2042bded0b3f`. Exact archive hashes and integrity are recorded in the
+This bundle is derived from `pi-cache-optimizer` 2.8.10 at commit
+`dc9be50b89957a37f8e80ef42378e3841ba8665a`. Exact source and npm archive hashes and integrity are recorded in the
 repository's `upstreams.lock.json`.
 
 The AdRouter adaptation defaults to `stats-only`. It derives session cache counters from normalized
@@ -16,4 +16,6 @@ skills, appended prompts, dates, and working-directory text remain byte-for-byte
 
 The adaptation intentionally omits provider registration, provider/model configuration writes,
 compat mutation, cache-retention environment mutation, raw hosted cache hints, prompt cache keys,
-skills compression, routing globals, and telemetry egress.
+skills compression, routing globals, persistent provider statistics, repair/configuration commands,
+and telemetry egress. The 2.8.3 through 2.8.10 upstream releases were reviewed; their expanded
+mutation and persistence surfaces remain outside this deliberately narrow bundle.
