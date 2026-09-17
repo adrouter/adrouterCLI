@@ -48,7 +48,7 @@ const stagingRoot = mkdtempSync(join(tmpdir(), `adrouter-${componentId}-${versio
 async function download(url, label) {
 	const response = await fetch(url, {
 		headers: { accept: "application/octet-stream", "user-agent": "AdRouterCLI upstream staging" },
-		signal: AbortSignal.timeout(60_000),
+		signal: AbortSignal.timeout(120_000),
 	});
 	if (!response.ok) throw new Error(`${componentId}: ${label} returned HTTP ${response.status}`);
 	return Buffer.from(await response.arrayBuffer());
