@@ -41,6 +41,16 @@ function validateSnapshot(snapshot, label, failures, { target = false } = {}) {
 	if (snapshot.npm_integrity !== undefined && !npmIntegrity.test(snapshot.npm_integrity)) {
 		failures.push(`${label}.npm_integrity must be a sha512 SRI value`);
 	}
+	if (target) {
+		const sourceFields = [snapshot.source_url, snapshot.source_sha256];
+		if (sourceFields.some((value) => value !== undefined) && sourceFields.some((value) => value === undefined)) {
+			failures.push(`${label} must pair source_url with source_sha256`);
+		}
+		const npmFields = [snapshot.npm_tarball_url, snapshot.npm_integrity, snapshot.npm_tarball_sha256];
+		if (npmFields.some((value) => value !== undefined) && npmFields.some((value) => value === undefined)) {
+			failures.push(`${label} must provide npm_tarball_url, npm_integrity, and npm_tarball_sha256 together`);
+		}
+	}
 }
 
 export function validateUpstreamLock(lock) {
@@ -195,4 +205,23 @@ export function sha256File(path) {
 
 export function sha512Integrity(buffer) {
 	return `sha512-${createHash("sha512").update(buffer).digest("base64")}`;
+}
+
+export function verifySourceArchive(bytes, snapshot, label = "source archive") {
+	if (!snapshot?.source_sha256) throw new Error(`${label}: source SHA-256 is not locked`);
+	const actual = createHash("sha256").update(bytes).digest("hex");
+	if (actual !== snapshot.source_sha256) throw new Error(`${label}: source SHA-256 does not match upstreams.lock.json`);
+}
+
+export function verifyNpmTarball(bytes, snapshot, label = "npm tarball") {
+	if (!snapshot?.npm_integrity || !snapshot?.npm_tarball_sha256) {
+		throw new Error(`${label}: npm integrity and tarball SHA-256 must both be locked`);
+	}
+	if (sha512Integrity(bytes) !== snapshot.npm_integrity) {
+		throw new Error(`${label}: npm integrity does not match upstreams.lock.json`);
+	}
+	const actualSha256 = createHash("sha256").update(bytes).digest("hex");
+	if (actualSha256 !== snapshot.npm_tarball_sha256) {
+		throw new Error(`${label}: npm tarball SHA-256 does not match upstreams.lock.json`);
+	}
 }

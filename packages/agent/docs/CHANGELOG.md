@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.81.0-beta.28] - 2026-09-17
+
+### Fixed
+
+- Port Pi 0.85.1 turn-preparation and abort cleanup fixes while preserving AdRouter request and
+  approval boundaries.
+
 ## [0.81.0-beta.27] - 2026-09-13
 
 ### Added

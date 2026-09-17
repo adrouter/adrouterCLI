@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.81.0-beta.28] - 2026-09-17
+
+### Fixed
+
+- Port reviewed Pi 0.85.1 OpenAI Responses request compatibility and preserve the existing Router
+  provider catalog, authentication, and settlement contracts.
+
 ## [0.81.0-beta.27] - 2026-09-13
 
 ### Added

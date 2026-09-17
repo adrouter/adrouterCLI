@@ -36,6 +36,7 @@ import registerSubagentNotify, { type SubagentNotifyDetails } from "../runs/back
 import { SUBAGENT_CHILD_ENV } from "../runs/shared/pi-args.ts";
 import { formatDuration, shortenPath } from "../shared/formatters.ts";
 import { loadConfig } from "./config.ts";
+import { createSessionMaintenanceLifecycle } from "./session-maintenance.ts";
 import {
 	type Details,
 	type SubagentState,
@@ -301,16 +302,23 @@ export default function registerSubagentExtension(pi: ExtensionAPI): void {
 		RESULTS_DIR,
 		10 * 60 * 1000,
 	);
-	startResultWatcher();
-	primeExistingResults();
+	const sessionMaintenance = createSessionMaintenanceLifecycle({
+		startWatcher: startResultWatcher,
+		primeResults: primeExistingResults,
+		stopWatcher: stopResultWatcher,
+		clearTimers: () => {
+			if (state.poller) {
+				clearInterval(state.poller);
+				state.poller = null;
+			}
+			for (const timer of state.cleanupTimers.values()) clearTimeout(timer);
+			state.cleanupTimers.clear();
+		},
+	});
 
 	const runtimeCleanup = () => {
-		stopResultWatcher();
+		sessionMaintenance.stop();
 		clearPendingForegroundControlNotices(state);
-		if (state.poller) {
-			clearInterval(state.poller);
-			state.poller = null;
-		}
 	};
 	globalStore[runtimeCleanupStoreKey] = runtimeCleanup;
 
@@ -574,7 +582,7 @@ OUT OF SCOPE:
 		clearPendingForegroundControlNotices(state);
 		resetJobs(ctx);
 		restoreSlashFinalSnapshots(ctx.sessionManager.getEntries());
-		primeExistingResults();
+		sessionMaintenance.start();
 	};
 
 	pi.on("session_start", (_event, ctx) => {
@@ -592,14 +600,8 @@ OUT OF SCOPE:
 		if (globalStore[eventUnsubscribeStoreKey] === eventUnsubscribes) {
 			delete globalStore[eventUnsubscribeStoreKey];
 		}
-		stopResultWatcher();
-		if (state.poller) clearInterval(state.poller);
-		state.poller = null;
+		sessionMaintenance.stop();
 		clearPendingForegroundControlNotices(state);
-		for (const timer of state.cleanupTimers.values()) {
-			clearTimeout(timer);
-		}
-		state.cleanupTimers.clear();
 		state.asyncJobs.clear();
 		clearSlashSnapshots();
 		slashBridge.cancelAll();

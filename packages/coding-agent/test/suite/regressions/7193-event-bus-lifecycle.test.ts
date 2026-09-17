@@ -65,4 +65,32 @@ describe("issue #7193 extension event-bus lifecycle", () => {
 		harness.session.dispose();
 		expect(await emit()).toEqual({ extension: 0, host: 1 });
 	});
+
+	it("discards subscriptions and flag defaults when an extension factory fails", async () => {
+		const eventBus = createEventBus();
+		const runtime = createExtensionRuntime();
+		let calls = 0;
+		let failedApi: ExtensionAPI | undefined;
+
+		await expect(
+			loadExtensionFromFactory(
+				(pi) => {
+					failedApi = pi;
+					pi.events.on("failed:test", () => calls++);
+					pi.registerFlag("failed-flag", { type: "boolean", default: true });
+					throw new Error("factory failed");
+				},
+				process.cwd(),
+				eventBus,
+				runtime,
+				"<failed>",
+			),
+		).rejects.toThrow("factory failed");
+
+		eventBus.emit("failed:test", undefined);
+		await new Promise((resolve) => setImmediate(resolve));
+		expect(calls).toBe(0);
+		expect(runtime.flagValues.has("failed-flag")).toBe(false);
+		expect(() => failedApi?.getCommands()).toThrow("failed to load");
+	});
 });

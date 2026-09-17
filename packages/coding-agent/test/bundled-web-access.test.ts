@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getWebSearchConfigPath } from "../bundled/pi-web-access-0.13.0/utils.ts";
+import { getWebSearchConfigPath } from "../bundled/pi-web-access-0.29.0/utils.ts";
 import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext } from "../src/core/extensions/index.ts";
 import { DefaultResourceLoader } from "../src/core/resource-loader.ts";
 
@@ -13,7 +13,7 @@ const temporaryDirectories: string[] = [];
 async function loadFreshWebAccessExtension(agentDir: string) {
 	process.env.ADROUTER_CODING_AGENT_DIR = agentDir;
 	vi.resetModules();
-	const bundleUrl = new URL("../bundled/pi-web-access-0.13.0/dist/index.js", import.meta.url);
+	const bundleUrl = new URL("../bundled/pi-web-access-0.29.0/dist/index.js", import.meta.url);
 	bundleUrl.searchParams.set("browserless-test", `${process.pid}-${Math.random().toString(36).slice(2)}`);
 	return import(/* @vite-ignore */ bundleUrl.href);
 }

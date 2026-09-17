@@ -161,13 +161,13 @@ for platform in "${PLATFORMS[@]}"; do
 	cp -r docs "$OUTPUT_DIR/$platform/"
 	cp -r bundled "$OUTPUT_DIR/$platform/"
 	node ../../scripts/verify-bundled-payload.mjs bundled "$OUTPUT_DIR/$platform/bundled"
-	test -f "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.13.0/dist/index.js"
-	test -f "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.13.0/skills/librarian/docs/SKILL.md"
-	test -f "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.13.0/LICENSE"
+	test -f "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.29.0/dist/index.js"
+	test -f "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.29.0/skills/librarian/docs/SKILL.md"
+	test -f "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.29.0/LICENSE"
 	test -f "$OUTPUT_DIR/$platform/bundled/adroutercli/skills/adroutercli/docs/SKILL.md"
 	test ! -e "$OUTPUT_DIR/$platform/bundled/pi-global-profiles-0.2.0"
-	test ! -e "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.13.0/test"
-	test ! -e "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.13.0/pi-web-fetch-demo.mp4"
+	test ! -e "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.29.0/test"
+	test ! -e "$OUTPUT_DIR/$platform/bundled/pi-web-access-0.29.0/pi-web-fetch-demo.mp4"
 
     case "$platform" in
         darwin-arm64)

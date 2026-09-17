@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [0.68.0-adrouter] - 2026-09-17
+
+- Advanced provenance through upstream 0.68.0 while retaining the bounded AdRouter execution and
+  management surface.
+- Scoped result watching, cleanup timers, and polling to the live parent session and cleared them
+  during shutdown or reload.
+- Re-reviewed and excluded remote machines, external agent CLIs, schedules, missions, profiles,
+  watchdogs, dynamic fanout, executable acceptance, provider mutation, and nested delegation.
+
 ## [0.45.2-adrouter] - 2026-08-11
 
 - Advanced provenance to the reviewed upstream 0.45.2 source while retaining only the bounded

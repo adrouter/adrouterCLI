@@ -17,13 +17,13 @@ export const GENERATED_BUNDLED_EXTENSION_CONTRACTS = [
 		],
 		tools: ["subagent"],
 		handlers: ["session_start", "session_shutdown", "tool_result"],
-		relativePath: ["pi-subagents-0.45.2", "src", "extension", "index.ts"],
+		relativePath: ["pi-subagents-0.68.0", "src", "extension", "index.ts"],
 	},
 	{
 		name: "pi-cache-optimizer",
 		commands: ["cache", "cache-optimizer"],
 		handlers: ["before_agent_start", "message_end", "session_shutdown", "session_start"],
-		relativePath: ["pi-cache-optimizer-2.8.2", "index.ts"],
+		relativePath: ["pi-cache-optimizer-2.8.10", "index.ts"],
 	},
 	{
 		name: "btw",
@@ -36,13 +36,13 @@ export const GENERATED_BUNDLED_EXTENSION_CONTRACTS = [
 		tools: ["fetch_content", "get_search_content", "web_search"],
 		handlers: ["session_shutdown", "session_start", "session_tree"],
 		shortcuts: ["ctrl+shift+w"],
-		relativePath: ["pi-web-access-0.13.0", "dist", "index.js"],
+		relativePath: ["pi-web-access-0.29.0", "dist", "index.js"],
 	},
 ] as const;
 
 export const GENERATED_BUNDLED_SKILL_DIRECTORIES = [
-	["pi-subagents-0.45.2", "skills"],
-	["pi-web-access-0.13.0", "skills"],
+	["pi-subagents-0.68.0", "skills"],
+	["pi-web-access-0.29.0", "skills"],
 	["adroutercli", "skills"],
 ] as const;
 
@@ -51,7 +51,7 @@ export const GENERATED_REQUIRED_BUNDLED_SKILLS = ["adroutercli", "librarian", "p
 export const GENERATED_BUNDLE_DIRECTORIES = [
 	"adroutercli",
 	"btw-23017e9",
-	"pi-cache-optimizer-2.8.2",
-	"pi-subagents-0.45.2",
-	"pi-web-access-0.13.0",
+	"pi-cache-optimizer-2.8.10",
+	"pi-subagents-0.68.0",
+	"pi-web-access-0.29.0",
 ] as const;

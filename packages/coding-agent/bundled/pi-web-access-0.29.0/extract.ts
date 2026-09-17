@@ -526,6 +526,39 @@ function isLikelyJSRendered(html: string): boolean {
 	return textContent.length < 500 && scriptCount > 3;
 }
 
+export async function readResponseBufferWithLimit(response: Response, maxBytes: number): Promise<ArrayBuffer> {
+	const reader = response.body?.getReader();
+	if (!reader) {
+		const buffer = await response.arrayBuffer();
+		if (buffer.byteLength > maxBytes) throw new Error(`Response too large (${Math.round(maxBytes / 1024 / 1024)}MB)`);
+		return buffer;
+	}
+	const chunks: Uint8Array[] = [];
+	let total = 0;
+	try {
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			if (!value) continue;
+			total += value.byteLength;
+			if (total > maxBytes) {
+				await reader.cancel();
+				throw new Error(`Response too large (${Math.round(maxBytes / 1024 / 1024)}MB)`);
+			}
+			chunks.push(value);
+		}
+	} finally {
+		reader.releaseLock();
+	}
+	const combined = new Uint8Array(total);
+	let offset = 0;
+	for (const chunk of chunks) {
+		combined.set(chunk, offset);
+		offset += chunk.byteLength;
+	}
+	return combined.buffer;
+}
+
 async function extractViaHttp(
 	url: string,
 	signal?: AbortSignal,
@@ -589,7 +622,7 @@ async function extractViaHttp(
 
 		if (isPDFContent) {
 			try {
-				const buffer = await response.arrayBuffer();
+				const buffer = await readResponseBufferWithLimit(response, maxResponseSize);
 				const result = await extractPDFToMarkdown(buffer, url);
 				activityMonitor.logComplete(activityId, response.status);
 				return {
@@ -619,7 +652,8 @@ async function extractViaHttp(
 			};
 		}
 
-		const text = await response.text();
+		const buffer = await readResponseBufferWithLimit(response, maxResponseSize);
+		const text = new TextDecoder("utf-8").decode(buffer);
 		const isHTML = contentType.includes("text/html") || contentType.includes("application/xhtml+xml");
 
 		if (!isHTML) {

@@ -13,7 +13,10 @@ type GoogleApiType = "google-generative-ai" | "google-vertex";
  * Thinking level for Gemini 3 models.
  * Mirrors Google's ThinkingLevel enum values.
  */
-export type GoogleThinkingLevel = "THINKING_LEVEL_UNSPECIFIED" | "MINIMAL" | "LOW" | "MEDIUM" | "HIGH";
+export type GoogleApiThinkingLevel = "THINKING_LEVEL_UNSPECIFIED" | "MINIMAL" | "LOW" | "MEDIUM" | "HIGH";
+
+/** @deprecated Use GoogleApiThinkingLevel. */
+export type GoogleThinkingLevel = GoogleApiThinkingLevel;
 
 /**
  * Determines whether a streamed Gemini `Part` should be treated as "thinking".

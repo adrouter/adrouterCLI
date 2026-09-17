@@ -1,6 +1,6 @@
 {
   "name": "pi-subagents",
-  "version": "0.45.2",
+  "version": "0.68.0",
   "description": "Reviewed AdRouter subset of pi-subagents for bounded single, parallel, chain, and lifecycle control",
   "author": "Nico Bailon",
   "license": "MIT",

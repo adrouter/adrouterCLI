@@ -6,29 +6,29 @@ AdRouterCLI distributes source copies of the following optional extensions in
 
 | Component | Version | Source | License |
 | --- | --- | --- | --- |
-| pi-subagents | 0.45.2 (reviewed AdRouter subset) | https://registry.npmjs.org/pi-subagents/-/pi-subagents-0.45.2.tgz | MIT |
-| pi-cache-optimizer | 2.8.2 (reviewed AdRouter subset) | https://registry.npmjs.org/pi-cache-optimizer/-/pi-cache-optimizer-2.8.2.tgz | MIT |
-| pi-web-access | 0.13.0 | https://registry.npmjs.org/pi-web-access/-/pi-web-access-0.13.0.tgz | MIT |
+| pi-subagents | 0.68.0 (reviewed AdRouter subset) | https://github.com/nicobailon/pi-subagents/tree/f3ccf47dc236b6c0fcc0d897cec4a9e6da3e916d | MIT |
+| pi-cache-optimizer | 2.8.10 (reviewed AdRouter subset) | https://github.com/jiangge/pi-cache-optimizer/tree/dc9be50b89957a37f8e80ef42378e3841ba8665a | MIT |
+| pi-web-access | 0.29.0 (reviewed AdRouter subset) | https://github.com/nicobailon/pi-web-access/tree/192ac1875e3b8f88c78953dbc314949ec9fcaa27 | MIT |
 | BTW | `23017e9` | project-owner source: `~/antigravity/pi-stuff/btw` | Project-owner source; distribution authorized |
 | pi-opencode-tui-patch | 0.1.6 (`e687e69b`) | project-owner source: `~/antigravity/pi-stuff/pi-opencode-tui-patch` | Project-owner source; distribution authorized |
 
-`pi-subagents@0.45.2` is pinned with npm integrity
-`sha512-VEvBF6vrpi+eLEjhgwqutSnaH/aw58+Um9vdJUc6Td1asH22bAKahrgD3AafaRNsROgiaukw4DRdmlRjEhBxQA==`.
-AdRouter retains its reviewed bounded execution engine and ports only the declared 0.45.2 lifecycle
+`pi-subagents@0.68.0` is pinned with source and npm archive hashes plus npm integrity
+`sha512-sfUKoSIegyCwnD0Y9dDE2sPm/kDmx3P85CQqRpuShv77iSWJXeEc3mDQUK1rZNbhHPnIdQSeFcK+G66hczQSgg==`.
+AdRouter retains its reviewed bounded execution engine and ports only the declared safe lifecycle
 subset. The public schema and runtime policy remove upstream automation and authority-expanding
 surfaces; exact adaptations are listed in the bundle's `ADROUTER_PATCHES.md`.
 
-`pi-cache-optimizer@2.8.2` is pinned with npm integrity
-`sha512-z5Ff2ZUF+U4O3gpV/uKTvO5046Zx/km1nDAw22b1GUKb8yslDAo1EZMlxTFTex9XGsmg/MVEt3FRmmpNNlpWvQ==`.
+`pi-cache-optimizer@2.8.10` is pinned with source and npm archive hashes plus npm integrity
+`sha512-u+Da+NDQROJuP0T1KTGLkrFRaPF0pcUCuI6KA5G2gGO/a3Z+IfoNxDF9+EmVAQ1vcu/kuQCBzvqb5QekhwAAzg==`.
 Only truthful normalized-usage statistics and an opt-in, DeepSeek-only stable-prefix rewrite are
 retained; provider/model mutation and raw cache controls are omitted.
 
-`pi-web-access@0.13.0` is pinned with npm integrity
-`sha512-ny0bHisMWdobmu1hcMp/jqjaRh6pYrH7dctBK2CVyRF4ia7bP47RnOPYdG1yiks9ohtcanWir5Hl9EFap8h0zQ==`.
-Its runtime source, manifest, librarian skill, and license are retained; demo
-media and upstream tests are omitted. Its runtime JavaScript dependencies are
-compiled into `bundled/pi-web-access-0.13.0/dist/index.js`, while host extension
-API imports remain external for loader compatibility.
+`pi-web-access@0.29.0` is pinned with source and npm archive hashes plus npm integrity
+`sha512-1l4sAWYkFhiBynJf/mXuxmCHxjhiAyWJ4rfQVFu8UPa0JQhCS9oXAmNXcL0Q1SfrO00plmb6L4IkypJ3n1Q4Kg==`.
+AdRouter ports bounded decoded-body reads, cancellation propagation, private external fetched-content
+caching, expiry pruning, and request-scoped HTTP(S) proxy routing. New providers, tools, commands,
+credential resolvers, and source-check authority remain excluded. Runtime dependencies are compiled
+into `bundled/pi-web-access-0.29.0/dist/index.js`, while host extension API imports remain external.
 
 ## Project-owner sources
 

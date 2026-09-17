@@ -1,6 +1,6 @@
-# pi-subagents 0.45.2 — AdRouter safe subset
+# pi-subagents 0.68.0 — AdRouter safe subset
 
-AdRouterCLI distributes a reviewed, source-derived subset of `pi-subagents` 0.45.2. Exact
+AdRouterCLI distributes a reviewed, source-derived subset of `pi-subagents` 0.68.0. Exact
 upstream identity, integrity, and the local patch policy are recorded in `upstreams.lock.json` and
 `ADROUTER_PATCHES.md`.
 

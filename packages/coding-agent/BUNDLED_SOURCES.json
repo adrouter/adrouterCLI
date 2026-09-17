@@ -4,33 +4,33 @@
   "bundles": [
     {
       "name": "pi-subagents",
-      "version": "0.45.2",
-      "commit": "7836c0f5ef642a00ae0572c910dec7a56216c74d",
-      "source_url": "https://registry.npmjs.org/pi-subagents/-/pi-subagents-0.45.2.tgz",
-      "npm_integrity": "sha512-VEvBF6vrpi+eLEjhgwqutSnaH/aw58+Um9vdJUc6Td1asH22bAKahrgD3AafaRNsROgiaukw4DRdmlRjEhBxQA==",
-      "source_sha256": "fb247e0d45f130d0f3f53efb63a95c56e417d8579af5ba2ba2f211b322701374",
+      "version": "0.68.0",
+      "commit": "f3ccf47dc236b6c0fcc0d897cec4a9e6da3e916d",
+      "source_url": "https://github.com/nicobailon/pi-subagents/archive/f3ccf47dc236b6c0fcc0d897cec4a9e6da3e916d.tar.gz",
+      "npm_integrity": "sha512-sfUKoSIegyCwnD0Y9dDE2sPm/kDmx3P85CQqRpuShv77iSWJXeEc3mDQUK1rZNbhHPnIdQSeFcK+G66hczQSgg==",
+      "source_sha256": "0f34897c8c3ba5f73fc70a6eb155ece4fa3093b7e507111194e972cd35ff59bd",
       "license": "MIT",
       "redistribution": {
         "status": "cleared",
         "basis": "MIT license distributed with the component"
       },
       "local_modifications": [
-        "Retained the previously reviewed single, static-parallel, compatibility-chain, status, interrupt, resume, and doctor engine while porting a private-file stop control from the 0.45.2 lifecycle surface.",
+        "Retained the previously reviewed single, static-parallel, compatibility-chain, status, interrupt, resume, and doctor engine while porting the private-file stop control and session-scoped maintenance lifecycle through 0.68.0.",
         "Changed child re-entry to adrouter, disabled normal bundled and user/project extension discovery in children, removed MCP-direct tools and nested delegation, and copied only a non-secret environment allowlist.",
         "Redirected user/project agents, chains, skills, artifacts, and installer state to .adrouter or ~/.adrouter without reading personal Pi state.",
         "Hard-capped every parallel group at three children and concurrency three, with at most one mutation-capable child; dynamic fanout, executable acceptance commands, config mutation, Gist, worktrees, external intercom, and agent-supplied executable extensions are absent from the public schema and rejected defensively.",
         "Added ADROUTER_SUBAGENTS=off without starting child processes, watchers, or state directories, and pinned exact reviewed package dependencies."
       ],
-      "update_procedure": "Run npm run upstream:stage -- --component pi-subagents --version 0.45.2, verify the locked archive, reconstruct the reviewed AdRouter patch set, and run npm run upstream:check plus npm run check.",
+      "update_procedure": "Run npm run upstream:stage -- --component pi-subagents --version 0.68.0, verify the locked source and npm archives, reconstruct the reviewed AdRouter patch set, and run npm run upstream:check plus npm run check.",
       "status": "source-derived-extension"
     },
     {
       "name": "pi-cache-optimizer",
-      "version": "2.8.2",
-      "commit": "dfa60b2c3e92f4a15363664c546d2042bded0b3f",
-      "source_url": "https://registry.npmjs.org/pi-cache-optimizer/-/pi-cache-optimizer-2.8.2.tgz",
-      "npm_integrity": "sha512-z5Ff2ZUF+U4O3gpV/uKTvO5046Zx/km1nDAw22b1GUKb8yslDAo1EZMlxTFTex9XGsmg/MVEt3FRmmpNNlpWvQ==",
-      "source_sha256": "41eea15faef8a70ce7cb50999a3bdd4016d65435d274b883c205f0332cc420cf",
+      "version": "2.8.10",
+      "commit": "dc9be50b89957a37f8e80ef42378e3841ba8665a",
+      "source_url": "https://github.com/jiangge/pi-cache-optimizer/archive/dc9be50b89957a37f8e80ef42378e3841ba8665a.tar.gz",
+      "npm_integrity": "sha512-u+Da+NDQROJuP0T1KTGLkrFRaPF0pcUCuI6KA5G2gGO/a3Z+IfoNxDF9+EmVAQ1vcu/kuQCBzvqb5QekhwAAzg==",
+      "source_sha256": "4521d4c11f9d25df3e1a676a3c2214352861c26e44e411efe1f14dd37e1df3d7",
       "license": "MIT",
       "redistribution": {
         "status": "cleared",
@@ -43,16 +43,16 @@
         "Restricted opt-in prompt canonicalization to official DeepSeek models and the known-stable built-in prefix; project context, skills, append prompts, dates, and working-directory text remain unchanged.",
         "Stored only the selected mode in a mode-0600 file under the AdRouter agent directory and omitted prompts, messages, headers, credentials, and usage telemetry from persistence."
       ],
-      "update_procedure": "Run npm run upstream:stage -- --component pi-cache-optimizer --version 2.8.2, verify the locked archive, reconstruct only the reviewed AdRouter stats and stable-prefix subset, and run focused byte-neutrality, state-permission, source-boundary, loader, and full repository gates.",
+      "update_procedure": "Run npm run upstream:stage -- --component pi-cache-optimizer --version 2.8.10, verify the locked source and npm archives, reconstruct only the reviewed AdRouter stats and stable-prefix subset, and run focused byte-neutrality, state-permission, source-boundary, loader, and full repository gates.",
       "status": "source-derived-extension"
     },
     {
       "name": "pi-web-access",
-      "version": "0.13.0",
-      "commit": "7bdc30a65cf77273eb9c0034647b373bda4060d7",
-      "source_url": "https://registry.npmjs.org/pi-web-access/-/pi-web-access-0.13.0.tgz",
-      "npm_integrity": "sha512-ny0bHisMWdobmu1hcMp/jqjaRh6pYrH7dctBK2CVyRF4ia7bP47RnOPYdG1yiks9ohtcanWir5Hl9EFap8h0zQ==",
-      "source_sha256": "1a63ecb9e25daa3e0dcbe7f19703164559de85ee1bbf519e881a348b9b804000",
+      "version": "0.29.0",
+      "commit": "192ac1875e3b8f88c78953dbc314949ec9fcaa27",
+      "source_url": "https://github.com/nicobailon/pi-web-access/archive/192ac1875e3b8f88c78953dbc314949ec9fcaa27.tar.gz",
+      "npm_integrity": "sha512-1l4sAWYkFhiBynJf/mXuxmCHxjhiAyWJ4rfQVFu8UPa0JQhCS9oXAmNXcL0Q1SfrO00plmb6L4IkypJ3n1Q4Kg==",
+      "source_sha256": "52f24742fae68b315bafb1621b531e9c9beb2e3d27092ed2f960078c08963b3e",
       "license": "MIT",
       "redistribution": {
         "status": "cleared",
@@ -63,7 +63,8 @@
         "Renamed the browser-cookie opt-in to ADROUTER_ALLOW_BROWSER_COOKIES.",
         "Pinned the manifest dependency ranges to the exact reviewed versions used for the compiled bundle.",
         "Compiled third-party runtime dependencies into dist/index.js while retaining host AdRouter extension API imports as externals.",
-        "Omitted upstream tests and demo media from the distributable bundle."
+        "Omitted upstream tests and demo media from the distributable bundle.",
+        "Ported decoded-body size enforcement, cancellation propagation, private external fetched-content caching, expiry pruning, and request-scoped HTTP(S) proxy routing without adding providers, tools, commands, or credential resolvers."
       ],
       "update_procedure": "Run npm run upstream:stage with the exact version, verify the locked tarball, retain runtime source/manifest/skill/license, reapply isolated-state adaptations, rebuild the compiled bundle, and run focused loader tests.",
       "status": "vendored"

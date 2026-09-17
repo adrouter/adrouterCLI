@@ -195,10 +195,10 @@ export function assertPackageTarball(pkg, packed, tarballPath) {
 			"THIRD_PARTY_NOTICES.md",
 			"dist/cli.js",
 			"dist/profile-cli.js",
-			"dist/bundled/pi-web-access-0.13.0/index.ts",
-			"dist/bundled/pi-web-access-0.13.0/dist/index.js",
-			"dist/bundled/pi-web-access-0.13.0/LICENSE",
-			"dist/bundled/pi-web-access-0.13.0/skills/librarian/docs/SKILL.md",
+			"dist/bundled/pi-web-access-0.29.0/index.ts",
+			"dist/bundled/pi-web-access-0.29.0/dist/index.js",
+			"dist/bundled/pi-web-access-0.29.0/LICENSE",
+			"dist/bundled/pi-web-access-0.29.0/skills/librarian/docs/SKILL.md",
 			"dist/bundled/adroutercli/skills/adroutercli/docs/SKILL.md",
 		]) {
 			if (!paths.has(required)) failures.push(`missing required runtime file ${required}`);
