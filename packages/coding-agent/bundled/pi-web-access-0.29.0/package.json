@@ -33,7 +33,7 @@
     "p-limit": "6.2.0",
     "turndown": "7.2.4",
     "unpdf": "1.6.2",
-    "undici": "8.5.0"
+    "undici": "8.9.0"
   },
   "peerDependencies": {
     "@adrouter/ai": "*",
