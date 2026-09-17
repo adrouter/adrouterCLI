@@ -7,7 +7,13 @@ import { normalizeFetchContentParams } from "./fetch-params.ts";
 import { clearCloneCache } from "./github-extract.ts";
 import { search, type SearchProvider, type ResolvedSearchProvider } from "./gemini-search.ts";
 import type { SearchResult } from "./perplexity.ts";
-import { formatSeconds, getWebSearchConfigDir, getWebSearchConfigPath } from "./utils.ts";
+import {
+	formatSeconds,
+	getWebSearchConfigDir,
+	getWebSearchConfigPath,
+	installScopedWebProxyFetch,
+	runWithWebProxy,
+} from "./utils.ts";
 import {
 	clearResults,
 	deleteResult,
@@ -46,6 +52,10 @@ import { buildSearchErrorPlan, type SearchErrorDetails, type SearchErrorPlan } f
 import { loadEnabledModelPatterns, modelMatchesEnabledPatterns } from "./summary-model-scope.ts";
 
 const WEB_SEARCH_CONFIG_PATH = getWebSearchConfigPath();
+
+function isAbortError(error: unknown): boolean {
+	return error instanceof Error && (error.name === "AbortError" || error.message.toLowerCase().includes("abort"));
+}
 
 /** Shared collapsed/expanded renderer for an error/cancel plan produced by
  * buildSearchErrorPlan(). Used by every tool renderResult's error branch so
@@ -554,6 +564,7 @@ function handleSessionChange(ctx: ExtensionContext): void {
 }
 
 export default function (pi: ExtensionAPI) {
+	installScopedWebProxyFetch();
 	const initConfig = loadConfigForExtensionInit();
 	const curateKey = initConfig.shortcuts?.curate || DEFAULT_SHORTCUTS.curate;
 	const activityKey = initConfig.shortcuts?.activity || DEFAULT_SHORTCUTS.activity;
@@ -563,7 +574,7 @@ export default function (pi: ExtensionAPI) {
 		const fetchId = generateId();
 		const controller = new AbortController();
 		pendingFetches.set(fetchId, controller);
-		fetchAllContent(urls, controller.signal)
+		runWithWebProxy(undefined, () => fetchAllContent(urls, controller.signal))
 			.then((fetched) => {
 				if (!sessionActive || !pendingFetches.has(fetchId)) return;
 				const data: StoredSearchData = {
@@ -572,8 +583,7 @@ export default function (pi: ExtensionAPI) {
 					timestamp: Date.now(),
 					urls: stripThumbnails(fetched),
 				};
-				storeResult(fetchId, data);
-				pi.appendEntry("web-search-results", data);
+				pi.appendEntry("web-search-results", storeResult(fetchId, data));
 				const ok = fetched.filter(f => !f.error).length;
 				pi.sendMessage(
 					{
@@ -608,8 +618,7 @@ export default function (pi: ExtensionAPI) {
 		const data: StoredSearchData = {
 			id, type: "search", timestamp: Date.now(), queries: results,
 		};
-		storeResult(id, data);
-		pi.appendEntry("web-search-results", data);
+		pi.appendEntry("web-search-results", storeResult(id, data));
 		return id;
 	}
 
@@ -881,8 +890,7 @@ export default function (pi: ExtensionAPI) {
 				timestamp: Date.now(),
 				urls: opts.inlineContent,
 			};
-			storeResult(fetchId, data);
-			pi.appendEntry("web-search-results", data);
+			pi.appendEntry("web-search-results", storeResult(fetchId, data));
 			if (!hasApprovedSummary) {
 				output += `---\nFull content for ${opts.inlineContent.length} sources available [${fetchId}].`;
 			}
@@ -1084,7 +1092,7 @@ export default function (pi: ExtensionAPI) {
 							? pc.searchProvider
 							: normalizedProvider;
 						try {
-							const { answer, results, inlineContent, provider: actualProvider } = await search(query, {
+							const { answer, results, inlineContent, provider: actualProvider } = await runWithWebProxy(undefined, () => search(query, {
 								provider: requestedProvider,
 								numResults: pc.numResults,
 								recencyFilter: pc.recencyFilter,
@@ -1092,7 +1100,7 @@ export default function (pi: ExtensionAPI) {
 								includeContent: pc.includeContent,
 								signal: addSearchSignal,
 								extensionContext: ctx,
-							});
+							}));
 							if (pendingCurates.get(callId) !== pc) throw new Error("Curator session is no longer active.");
 							pc.searchResults.set(queryIndex, { query, answer, results, error: null, provider: actualProvider });
 							if (inlineContent) pc.allInlineContent.push(...inlineContent);
@@ -1372,7 +1380,7 @@ export default function (pi: ExtensionAPI) {
 					});
 					const requestedProvider = pc.searchProvider;
 					try {
-						const { answer, results, inlineContent, provider } = await search(queryList[qi], {
+						const { answer, results, inlineContent, provider } = await runWithWebProxy(undefined, () => search(queryList[qi], {
 							provider: requestedProvider,
 							numResults: params.numResults,
 							recencyFilter: params.recencyFilter,
@@ -1380,7 +1388,7 @@ export default function (pi: ExtensionAPI) {
 							includeContent: params.includeContent,
 							signal: searchSignal,
 							extensionContext: ctx,
-						});
+						}));
 						if (signal?.aborted || cancelled || searchAbort.signal.aborted) break;
 						searchResults.set(qi, { query: queryList[qi], answer, results, error: null, provider });
 						if (inlineContent) allInlineContent.push(...inlineContent);
@@ -1448,6 +1456,7 @@ export default function (pi: ExtensionAPI) {
 
 			for (let i = 0; i < queryList.length; i++) {
 				const query = queryList[i];
+				signal?.throwIfAborted();
 
 				onUpdate?.({
 					content: [{ type: "text", text: `Searching ${i + 1}/${queryList.length}: "${query}"...` }],
@@ -1455,7 +1464,7 @@ export default function (pi: ExtensionAPI) {
 				});
 
 				try {
-					const { answer, results, inlineContent, provider } = await search(query, {
+					const { answer, results, inlineContent, provider } = await runWithWebProxy(undefined, () => search(query, {
 						provider: resolvedProvider,
 						numResults: params.numResults,
 						recencyFilter: params.recencyFilter,
@@ -1463,7 +1472,7 @@ export default function (pi: ExtensionAPI) {
 						includeContent: params.includeContent,
 						signal,
 						extensionContext: ctx,
-					});
+					}));
 
 					searchResults.push({ query, answer, results, error: null, provider });
 					for (const r of results) {
@@ -1473,6 +1482,7 @@ export default function (pi: ExtensionAPI) {
 					}
 					if (inlineContent) allInlineContent.push(...inlineContent);
 				} catch (err) {
+					if (signal?.aborted || isAbortError(err)) throw err;
 					const message = err instanceof Error ? err.message : String(err);
 					const requestedProvider = typeof resolvedProvider === "string" && resolvedProvider !== "auto"
 						? resolvedProvider
@@ -1815,7 +1825,7 @@ export default function (pi: ExtensionAPI) {
 				details: { phase: "fetch", progress: 0 },
 			});
 
-			const fetchResults = await fetchAllContent(urlList, signal, options);
+			const fetchResults = await runWithWebProxy(undefined, () => fetchAllContent(urlList, signal, options));
 			const successful = fetchResults.filter((r) => !r.error).length;
 			const totalChars = fetchResults.reduce((sum, r) => sum + r.content.length, 0);
 
@@ -1827,8 +1837,7 @@ export default function (pi: ExtensionAPI) {
 				timestamp: Date.now(),
 				urls: stripThumbnails(fetchResults),
 			};
-			storeResult(responseId, data);
-			pi.appendEntry("web-search-results", data);
+			pi.appendEntry("web-search-results", storeResult(responseId, data));
 
 			// Single URL: return content directly (possibly truncated) with responseId
 			if (urlList.length === 1) {
@@ -2209,10 +2218,10 @@ export default function (pi: ExtensionAPI) {
 			const provider = normalizeProviderInput(loadConfigForExtensionInit().provider);
 			for (const query of queryList) {
 				try {
-					const result = await search(query, {
+					const result = await runWithWebProxy(undefined, () => search(query, {
 						provider,
 						extensionContext: ctx,
-					});
+					}));
 					searchResults.push({
 						query,
 						answer: result.answer,
@@ -2421,11 +2430,11 @@ export default function (pi: ExtensionAPI) {
 								? currentSearchProvider
 								: normalizedProvider;
 							try {
-								const { answer, results, provider: actualProvider } = await search(query, {
+								const { answer, results, provider: actualProvider } = await runWithWebProxy(undefined, () => search(query, {
 									provider: requestedProvider,
 									signal: searchAbort.signal,
 									extensionContext: ctx,
-								});
+								}));
 								if (commandHandle && !isCommandActive()) {
 									throw new Error("Curator session is no longer active.");
 								}
@@ -2494,11 +2503,11 @@ export default function (pi: ExtensionAPI) {
 							if (aborted || !isCommandActive()) break;
 							const requestedProvider = currentSearchProvider;
 							try {
-								const { answer, results, provider } = await search(queries[qi], {
+								const { answer, results, provider } = await runWithWebProxy(undefined, () => search(queries[qi], {
 									provider: requestedProvider,
 									signal: searchAbort.signal,
 									extensionContext: ctx,
-								});
+								}));
 								if (aborted || !isCommandActive()) break;
 								handle.pushResult(qi, {
 									answer,

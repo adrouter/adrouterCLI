@@ -102,7 +102,7 @@ try {
 		"THIRD_PARTY_NOTICES.md",
 		"README.md",
 		"dist/bundled/adroutercli/skills/adroutercli/docs/SKILL.md",
-		"dist/bundled/pi-web-access-0.13.0/dist/index.js",
+		"dist/bundled/pi-web-access-0.29.0/dist/index.js",
 		"node_modules/@adrouter/ai/dist/index.js",
 		"node_modules/@adrouter/tui/dist/index.js",
 		"node_modules/@adrouter/agent-core/dist/index.js",

@@ -3,9 +3,12 @@ import { mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
+import { componentById, readUpstreamLock } from "./upstream-lock.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const bundleRoot = join(repoRoot, "packages", "coding-agent", "bundled", "pi-web-access-0.13.0");
+const active = componentById(readUpstreamLock(), "pi-web-access")?.active;
+if (!active?.version) throw new Error("pi-web-access active version is missing from upstreams.lock.json");
+const bundleRoot = join(repoRoot, "packages", "coding-agent", "bundled", `pi-web-access-${active.version}`);
 mkdirSync(join(bundleRoot, "dist"), { recursive: true });
 
 await build({
@@ -27,5 +30,6 @@ await build({
 		"typebox/*",
 		"canvas",
 		"@napi-rs/canvas",
+		"undici",
 	],
 });

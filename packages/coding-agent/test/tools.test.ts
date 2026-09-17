@@ -984,13 +984,7 @@ describe("tool cwd resolution", () => {
 		).toContain("write.txt");
 		expect(
 			getTextOutput(
-				await createBashToolDefinition("/", { exposeSessionEnvironment: false }).execute(
-					"bash",
-					{ command: "pwd" },
-					undefined,
-					undefined,
-					context,
-				),
+				await createBashToolDefinition("/").execute("bash", { command: "pwd" }, undefined, undefined, context),
 			),
 		).toContain(testDir);
 	});

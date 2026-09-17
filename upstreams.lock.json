@@ -147,11 +147,14 @@
 				"npm_package": "pi-web-access"
 			},
 			"active": {
-				"version": "0.13.0",
-				"commit": "7bdc30a65cf77273eb9c0034647b373bda4060d7",
-				"source_url": "https://registry.npmjs.org/pi-web-access/-/pi-web-access-0.13.0.tgz",
-				"npm_integrity": "sha512-ny0bHisMWdobmu1hcMp/jqjaRh6pYrH7dctBK2CVyRF4ia7bP47RnOPYdG1yiks9ohtcanWir5Hl9EFap8h0zQ==",
-				"source_sha256": "1a63ecb9e25daa3e0dcbe7f19703164559de85ee1bbf519e881a348b9b804000"
+				"version": "0.29.0",
+				"tag": "v0.29.0",
+				"commit": "192ac1875e3b8f88c78953dbc314949ec9fcaa27",
+				"source_url": "https://github.com/nicobailon/pi-web-access/archive/192ac1875e3b8f88c78953dbc314949ec9fcaa27.tar.gz",
+				"source_sha256": "52f24742fae68b315bafb1621b531e9c9beb2e3d27092ed2f960078c08963b3e",
+				"npm_tarball_url": "https://registry.npmjs.org/pi-web-access/-/pi-web-access-0.29.0.tgz",
+				"npm_integrity": "sha512-1l4sAWYkFhiBynJf/mXuxmCHxjhiAyWJ4rfQVFu8UPa0JQhCS9oXAmNXcL0Q1SfrO00plmb6L4IkypJ3n1Q4Kg==",
+				"npm_tarball_sha256": "ca8a0fb438255a5aa9ff1d544486a31fe6b100e30e02081cfcabdaa2a1635d09"
 			},
 			"target": {
 				"version": "0.29.0",
@@ -168,13 +171,14 @@
 				"Renamed the browser-cookie opt-in to ADROUTER_ALLOW_BROWSER_COOKIES.",
 				"Pinned the manifest dependency ranges to the exact reviewed versions used for the compiled bundle.",
 				"Compiled third-party runtime dependencies into dist/index.js while retaining host AdRouter extension API imports as externals.",
-				"Omitted upstream tests and demo media from the distributable bundle."
+				"Omitted upstream tests and demo media from the distributable bundle.",
+				"Ported decoded-body size enforcement, cancellation propagation, private external fetched-content caching, expiry pruning, and request-scoped HTTP(S) proxy routing without adding providers, tools, commands, or credential resolvers."
 			],
 			"feature_disposition": {
-				"adopt": ["current reviewed runtime"],
-				"adapt": ["AdRouter state and browser-cookie opt-in"],
+				"adopt": ["0.29.0 reviewed runtime fixes within the existing public surface"],
+				"adapt": ["AdRouter state and browser-cookie opt-in", "private fetched-content cache and scoped proxy routing"],
 				"defer": ["future upstream versions"],
-				"reject": []
+				"reject": ["new providers, tools, commands, credential resolvers, and source_check authority introduced after 0.13.0"]
 			},
 			"public_bundle": {
 				"order": 30,
@@ -263,7 +267,7 @@
 			"btw-23017e9",
 			"pi-cache-optimizer-2.8.10",
 			"pi-subagents-0.68.0",
-			"pi-web-access-0.13.0"
+			"pi-web-access-0.29.0"
 		],
 		"extensions": [
 			{
@@ -290,7 +294,7 @@
 			{
 				"component": "pi-web-access",
 				"name": "pi-web-access",
-				"relative_path": ["pi-web-access-0.13.0", "dist", "index.js"],
+				"relative_path": ["pi-web-access-0.29.0", "dist", "index.js"],
 				"commands": ["curator", "google-account", "search", "websearch"],
 				"tools": ["fetch_content", "get_search_content", "web_search"],
 				"handlers": ["session_shutdown", "session_start", "session_tree"],
@@ -299,7 +303,7 @@
 		],
 		"skill_directories": [
 			["pi-subagents-0.68.0", "skills"],
-			["pi-web-access-0.13.0", "skills"],
+			["pi-web-access-0.29.0", "skills"],
 			["adroutercli", "skills"]
 		],
 		"required_skills": ["adroutercli", "librarian", "pi-subagents"]

@@ -1,6 +1,6 @@
 {
   "name": "pi-web-access",
-  "version": "0.13.0",
+  "version": "0.29.0",
   "description": "Web search, URL fetching, GitHub repo cloning, PDF extraction, YouTube video understanding, and local video analysis for Pi coding agent. Supports OpenAI, Brave, Parallel, Tavily, Exa, Perplexity, and Gemini.",
   "type": "module",
   "scripts": {
@@ -18,7 +18,7 @@
   ],
   "author": "Nico Bailon",
   "license": "MIT",
-  "distIntegrity": "sha512-ny0bHisMWdobmu1hcMp/jqjaRh6pYrH7dctBK2CVyRF4ia7bP47RnOPYdG1yiks9ohtcanWir5Hl9EFap8h0zQ==",
+  "distIntegrity": "sha512-1l4sAWYkFhiBynJf/mXuxmCHxjhiAyWJ4rfQVFu8UPa0JQhCS9oXAmNXcL0Q1SfrO00plmb6L4IkypJ3n1Q4Kg==",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nicobailon/pi-web-access.git"
@@ -32,7 +32,8 @@
     "linkedom": "0.16.11",
     "p-limit": "6.2.0",
     "turndown": "7.2.4",
-    "unpdf": "1.6.2"
+    "unpdf": "1.6.2",
+    "undici": "8.5.0"
   },
   "peerDependencies": {
     "@adrouter/ai": "*",

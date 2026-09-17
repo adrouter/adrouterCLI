@@ -53,7 +53,7 @@ describe("DefaultResourceLoader", () => {
 				"pi-subagents-0.68.0/src/extension/index.ts",
 				"pi-cache-optimizer-2.8.10/index.ts",
 				"btw-23017e9/index.ts",
-				"pi-web-access-0.13.0/dist/index.js",
+				"pi-web-access-0.29.0/dist/index.js",
 			]);
 			expect(extensions.some((extension) => extension.commands.has("btw"))).toBe(true);
 			const webExtension = extensions.find((extension) => extension.tools.has("web_search"));
