@@ -1,15 +1,16 @@
-# AdRouter 0.45.2 safe-subset ledger
+# AdRouter 0.68.0 safe-subset ledger
 
-This bundle is derived from `pi-subagents` 0.45.2 at commit
-`7836c0f5ef642a00ae0572c910dec7a56216c74d`. Exact source and integrity values are frozen in
+This bundle is derived from `pi-subagents` 0.68.0 at commit
+`f3ccf47dc236b6c0fcc0d897cec4a9e6da3e916d`. Exact source and npm archive values are frozen in
 `upstreams.lock.json`. AdRouter carries forward its previously reviewed execution engine and ports
-only the bounded 0.45.2 lifecycle behavior needed by the product.
+only bounded lifecycle behavior needed by the product.
 
 Included runtime behavior:
 
 - structured single, static parallel, and compatible chain execution;
 - foreground/background status, interrupt, resume, and stop controls;
 - bounded concurrency, output truncation, session-local run identity, cleanup, and doctor output;
+- result watching and cleanup timers start with the parent session and are cleared on shutdown or reload;
 - `adrouter` child-process re-entry with bundled product extensions disabled in children;
 - user/project agent discovery under `.adrouter` and `~/.adrouter` only.
 
@@ -31,6 +32,8 @@ Explicitly disabled or omitted:
   delegation;
 - arbitrary cache/provider hints or access to personal Pi state.
 - create/update/delete management, append-step, dynamic fanout, and executable acceptance commands.
+- Herdr, remote-machine agents, external CLI agents, runtime agent registration, scheduled workflows,
+  output schemas, cache-tier mutation, and the expanded 0.46.0–0.68.0 product surface.
 
 The extension is kill-switchable with `ADROUTER_SUBAGENTS=off`. The disabled runtime still
 registers stable command/tool contracts so startup diagnostics remain deterministic, but every

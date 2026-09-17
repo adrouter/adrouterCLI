@@ -162,7 +162,7 @@ function verifyDownloadedTarball(tarballPath) {
 		"THIRD_PARTY_NOTICES.md",
 		join("dist", "cli.js"),
 		join("dist", "profile-cli.js"),
-		join("dist", "bundled", "pi-subagents-0.45.2", "src", "extension", "index.ts"),
+		join("dist", "bundled", "pi-subagents-0.68.0", "src", "extension", "index.ts"),
 		join("dist", "bundled", "btw-23017e9", "index.ts"),
 		join("dist", "bundled", "pi-web-access-0.13.0", "dist", "index.js"),
 	]) {

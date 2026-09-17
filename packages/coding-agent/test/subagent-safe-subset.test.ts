@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const tempDirectories: string[] = [];
 
 function loadBundled(relativePath: string) {
-	return import(new URL(`../bundled/pi-subagents-0.45.2/${relativePath}`, import.meta.url).href);
+	return import(new URL(`../bundled/pi-subagents-0.68.0/${relativePath}`, import.meta.url).href);
 }
 
 function tempDirectory(): string {
@@ -23,6 +23,24 @@ afterEach(() => {
 });
 
 describe("AdRouter pi-subagents safe subset", () => {
+	it("starts maintenance once per session and clears it on shutdown", async () => {
+		const { createSessionMaintenanceLifecycle } = await loadBundled("src/extension/session-maintenance.ts");
+		const calls: string[] = [];
+		const lifecycle = createSessionMaintenanceLifecycle({
+			startWatcher: () => calls.push("start"),
+			primeResults: () => calls.push("prime"),
+			stopWatcher: () => calls.push("stop"),
+			clearTimers: () => calls.push("clear"),
+		});
+
+		lifecycle.start();
+		lifecycle.start();
+		lifecycle.stop();
+		lifecycle.stop();
+		lifecycle.start();
+		expect(calls).toEqual(["start", "prime", "stop", "clear", "start", "prime"]);
+	});
+
 	it("forces depth-one, three-child, and no-intercom/worktree configuration", async () => {
 		const { applyAdRouterSubagentPolicy } = await loadBundled("src/extension/config.ts");
 		const {

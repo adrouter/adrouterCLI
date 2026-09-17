@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getPiSpawnCommand } from "../bundled/pi-subagents-0.45.2/src/runs/shared/pi-spawn.ts";
+import { getPiSpawnCommand } from "../bundled/pi-subagents-0.68.0/src/runs/shared/pi-spawn.ts";
 
 describe("bundled subagent launcher", () => {
 	it("uses AdRouterCLI when the active script does not need a Windows wrapper", () => {

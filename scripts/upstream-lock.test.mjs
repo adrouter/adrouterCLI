@@ -28,7 +28,7 @@ test("public bundle inventory and runtime module are generated deterministically
 	);
 	const first = generatedRuntimeModuleText(lock);
 	assert.equal(first, generatedRuntimeModuleText(JSON.parse(JSON.stringify(lock))));
-	assert.match(first, /pi-subagents-0\.45\.2/);
+	assert.match(first, /pi-subagents-0\.68\.0/);
 	assert.match(first, /pi-cache-optimizer-2\.8\.10/);
 	assert.match(first, /GENERATED_BUNDLE_DIRECTORIES/);
 });

@@ -6,15 +6,15 @@ AdRouterCLI distributes source copies of the following optional extensions in
 
 | Component | Version | Source | License |
 | --- | --- | --- | --- |
-| pi-subagents | 0.45.2 (reviewed AdRouter subset) | https://registry.npmjs.org/pi-subagents/-/pi-subagents-0.45.2.tgz | MIT |
+| pi-subagents | 0.68.0 (reviewed AdRouter subset) | https://github.com/nicobailon/pi-subagents/tree/f3ccf47dc236b6c0fcc0d897cec4a9e6da3e916d | MIT |
 | pi-cache-optimizer | 2.8.10 (reviewed AdRouter subset) | https://github.com/jiangge/pi-cache-optimizer/tree/dc9be50b89957a37f8e80ef42378e3841ba8665a | MIT |
 | pi-web-access | 0.13.0 | https://registry.npmjs.org/pi-web-access/-/pi-web-access-0.13.0.tgz | MIT |
 | BTW | `23017e9` | project-owner source: `~/antigravity/pi-stuff/btw` | Project-owner source; distribution authorized |
 | pi-opencode-tui-patch | 0.1.6 (`e687e69b`) | project-owner source: `~/antigravity/pi-stuff/pi-opencode-tui-patch` | Project-owner source; distribution authorized |
 
-`pi-subagents@0.45.2` is pinned with npm integrity
-`sha512-VEvBF6vrpi+eLEjhgwqutSnaH/aw58+Um9vdJUc6Td1asH22bAKahrgD3AafaRNsROgiaukw4DRdmlRjEhBxQA==`.
-AdRouter retains its reviewed bounded execution engine and ports only the declared 0.45.2 lifecycle
+`pi-subagents@0.68.0` is pinned with source and npm archive hashes plus npm integrity
+`sha512-sfUKoSIegyCwnD0Y9dDE2sPm/kDmx3P85CQqRpuShv77iSWJXeEc3mDQUK1rZNbhHPnIdQSeFcK+G66hczQSgg==`.
+AdRouter retains its reviewed bounded execution engine and ports only the declared safe lifecycle
 subset. The public schema and runtime policy remove upstream automation and authority-expanding
 surfaces; exact adaptations are listed in the bundle's `ADROUTER_PATCHES.md`.
 

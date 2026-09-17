@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 describe("bundled feature state paths", () => {
 	it("uses AdRouterCLI's configurable agent directory", () => {
 		const source = readFileSync(
-			new URL("../bundled/pi-subagents-0.45.2/src/shared/utils.ts", import.meta.url),
+			new URL("../bundled/pi-subagents-0.68.0/src/shared/utils.ts", import.meta.url),
 			"utf8",
 		);
 		expect(source).toContain("process.env.ADROUTER_CODING_AGENT_DIR");
@@ -16,13 +16,13 @@ describe("bundled feature state paths", () => {
 	it("does not retain literal Pi state paths in active bundled sources", () => {
 		const sourceRoot = new URL("../bundled/", import.meta.url);
 		const activeSources = [
-			"pi-subagents-0.45.2/install.mjs",
-			"pi-subagents-0.45.2/src/agents/agent-management.ts",
-			"pi-subagents-0.45.2/src/agents/agents.ts",
-			"pi-subagents-0.45.2/src/agents/skills.ts",
-			"pi-subagents-0.45.2/src/intercom/intercom-bridge.ts",
-			"pi-subagents-0.45.2/src/runs/shared/mcp-direct-tool-allowlist.ts",
-			"pi-subagents-0.45.2/src/shared/utils.ts",
+			"pi-subagents-0.68.0/install.mjs",
+			"pi-subagents-0.68.0/src/agents/agent-management.ts",
+			"pi-subagents-0.68.0/src/agents/agents.ts",
+			"pi-subagents-0.68.0/src/agents/skills.ts",
+			"pi-subagents-0.68.0/src/intercom/intercom-bridge.ts",
+			"pi-subagents-0.68.0/src/runs/shared/mcp-direct-tool-allowlist.ts",
+			"pi-subagents-0.68.0/src/shared/utils.ts",
 		];
 
 		for (const relativePath of activeSources) {

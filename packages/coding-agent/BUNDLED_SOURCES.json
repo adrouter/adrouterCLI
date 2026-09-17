@@ -4,18 +4,18 @@
   "bundles": [
     {
       "name": "pi-subagents",
-      "version": "0.45.2",
-      "commit": "7836c0f5ef642a00ae0572c910dec7a56216c74d",
-      "source_url": "https://registry.npmjs.org/pi-subagents/-/pi-subagents-0.45.2.tgz",
-      "npm_integrity": "sha512-VEvBF6vrpi+eLEjhgwqutSnaH/aw58+Um9vdJUc6Td1asH22bAKahrgD3AafaRNsROgiaukw4DRdmlRjEhBxQA==",
-      "source_sha256": "fb247e0d45f130d0f3f53efb63a95c56e417d8579af5ba2ba2f211b322701374",
+      "version": "0.68.0",
+      "commit": "f3ccf47dc236b6c0fcc0d897cec4a9e6da3e916d",
+      "source_url": "https://github.com/nicobailon/pi-subagents/archive/f3ccf47dc236b6c0fcc0d897cec4a9e6da3e916d.tar.gz",
+      "npm_integrity": "sha512-sfUKoSIegyCwnD0Y9dDE2sPm/kDmx3P85CQqRpuShv77iSWJXeEc3mDQUK1rZNbhHPnIdQSeFcK+G66hczQSgg==",
+      "source_sha256": "0f34897c8c3ba5f73fc70a6eb155ece4fa3093b7e507111194e972cd35ff59bd",
       "license": "MIT",
       "redistribution": {
         "status": "cleared",
         "basis": "MIT license distributed with the component"
       },
       "local_modifications": [
-        "Retained the previously reviewed single, static-parallel, compatibility-chain, status, interrupt, resume, and doctor engine while porting a private-file stop control from the 0.45.2 lifecycle surface.",
+        "Retained the previously reviewed single, static-parallel, compatibility-chain, status, interrupt, resume, and doctor engine while porting the private-file stop control and session-scoped maintenance lifecycle through 0.68.0.",
         "Changed child re-entry to adrouter, disabled normal bundled and user/project extension discovery in children, removed MCP-direct tools and nested delegation, and copied only a non-secret environment allowlist.",
         "Redirected user/project agents, chains, skills, artifacts, and installer state to .adrouter or ~/.adrouter without reading personal Pi state.",
         "Hard-capped every parallel group at three children and concurrency three, with at most one mutation-capable child; dynamic fanout, executable acceptance commands, config mutation, Gist, worktrees, external intercom, and agent-supplied executable extensions are absent from the public schema and rejected defensively.",
